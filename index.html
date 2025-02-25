@@ -348,6 +348,28 @@
             display: inline;
             vertical-align: middle;
         }
+
+        /* Context menu styles */
+        .context-menu {
+            display: none;
+            position: absolute;
+            z-index: 1000;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 5px 0;
+        }
+
+        .context-menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .context-menu-item:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 
@@ -415,6 +437,12 @@
                 <div id="mobile-tasks-container">
                     <!-- Task items will be added here -->
                 </div>
+            </div>
+
+            <!-- Context menu -->
+            <div id="context-menu" class="context-menu">
+                <div class="context-menu-item" id="edit-task">Edit</div>
+                <div class="context-menu-item" id="delete-task">Delete</div>
             </div>
         </div>
     </div>
@@ -602,6 +630,35 @@
                 $('.event').on('click', function (e) {
                     e.stopPropagation();
                     NotificationManager.showNotification('info', 'Task: ' + $(this).text());
+                });
+
+                // Context menu functionality
+                let currentTaskId = null;
+
+                $('.event').on('contextmenu', function (e) {
+                    e.preventDefault();
+                    currentTaskId = $(this).data('task-id');
+                    $('#context-menu').css({
+                        display: 'block',
+                        left: e.pageX,
+                        top: e.pageY
+                    });
+                });
+
+                $(document).click(function () {
+                    $('#context-menu').hide();
+                });
+
+                $('#edit-task').click(function () {
+                    $('#context-menu').hide();
+                    // Implement edit functionality here
+                    alert('Edit task: ' + currentTaskId);
+                });
+
+                $('#delete-task').click(function () {
+                    $('#context-menu').hide();
+                    // Implement delete functionality here
+                    alert('Delete task: ' + currentTaskId);
                 });
             }
 
