@@ -360,59 +360,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <script>
-        const NotificationManager = {
-            mobileNotificationCount: 0,
-            maxMobileNotifications: 2,
-            isMobile: () => window.innerWidth <= 768,
-
-            showNotification: function (type, message) {
-                if (this.isMobile() && this.mobileNotificationCount >= this.maxMobileNotifications) {
-                    const notifications = document.querySelectorAll('.bootstrap-notify-container');
-                    if (notifications.length > 0) {
-                        notifications[0].remove();
-                        this.mobileNotificationCount--;
-                    }
-                }
-
-                if (this.isMobile()) {
-                    this.mobileNotificationCount++;
-                }
-
-                $.notify({
-                    message: message,
-                    icon: type === 'success' ? 'bi bi-check-circle' : 'bi bi-exclamation-circle'
-                }, {
-                    type: type,
-                    allow_dismiss: true,
-                    newest_on_top: true,
-                    timer: 3000,
-                    placement: {
-                        from: 'top',
-                        align: this.isMobile() ? 'center' : 'right'
-                    },
-                    animate: {
-                        enter: 'animated bounceInDown',
-                        exit: 'animated bounceOutUp'
-                    },
-                    template:
-                        '<div data-notify="container" class="bootstrap-notify-container alert alert-{0}" role="alert">' +
-                        '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
-                        '<div class="notification-content">' +
-                        '<span data-notify="icon"></span>' +
-                        '<span data-notify="message">{2}</span>' +
-                        '</div>' +
-                        '</div>',
-                    onClose: () => {
-                        if (this.isMobile()) {
-                            this.mobileNotificationCount--;
-                        }
-                    }
-                });
-            }
-        };
-
         $(document).ready(function () {
             const defaultColors = {
                 'blue': '#0d6efd',
@@ -536,7 +486,7 @@
 
                 $('.event').on('click', function (e) {
                     e.stopPropagation();
-                    NotificationManager.showNotification('info', 'Task: ' + $(this).text());
+                    alert('Task: ' + $(this).text());
                 });
             }
 
@@ -592,7 +542,7 @@
                 }
 
                 $('.task-item').on('click', function () {
-                    NotificationManager.showNotification('info', 'Task: ' + $(this).find('.task-title').text());
+                    alert('Task: ' + $(this).find('.task-title').text());
                 });
             }
 
@@ -604,13 +554,12 @@
                         if (response.success) {
                             const activities = response.activities;
                             updateCalendarWithActivities(activities);
-                            NotificationManager.showNotification('success', 'Activities fetched successfully!');
                         } else {
-                            NotificationManager.showNotification('error', 'Failed to fetch activities: ' + response.message);
+                            alert('Failed to fetch activities: ' + response.message);
                         }
                     },
                     error: function (jqXHR) {
-                        NotificationManager.showNotification('error', 'Error fetching activities: ' + jqXHR.responseText);
+                        alert('Error fetching activities: ' + jqXHR.responseText);
                     }
                 });
             }
@@ -679,12 +628,12 @@
                                 passwordModal.hide();
                                 callback(true);
                             } else {
-                                NotificationManager.showNotification('error', 'Incorrect code');
+                                alert('Incorrect code');
                                 callback(false);
                             }
                         },
                         error: function (jqXHR) {
-                            NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
+                            alert('Error: ' + jqXHR.responseText);
                             callback(false);
                         }
                     });
@@ -823,7 +772,7 @@
                                     }),
                                     success: function (response) {
                                         if (response.success) {
-                                            NotificationManager.showNotification('success', 'Event added successfully!');
+                                            alert('Event added successfully!');
                                             tasks.push({
                                                 id: tasks.length + 1,
                                                 date: date,
@@ -837,24 +786,24 @@
                                             }
                                             modal.hide();
                                         } else {
-                                            NotificationManager.showNotification('error', 'Error: ' + response.message);
+                                            alert('Error: ' + response.message);
                                         }
                                     },
                                     error: function (jqXHR) {
-                                        NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
+                                        alert('Error: ' + jqXHR.responseText);
                                     }
                                 });
                             }
                         });
                     } else {
-                        NotificationManager.showNotification('error', 'Please fill in all required fields');
+                        alert('Please fill in all required fields');
                     }
                 });
             });
 
             $('.dropdown-item').click(function () {
                 const view = $(this).data('view');
-                NotificationManager.showNotification('info', 'Changing to ' + view + ' view. This functionality is not implemented in this demo.');
+                alert('Changing to ' + view + ' view. This functionality is not implemented in this demo.');
             });
         });
     </script>
