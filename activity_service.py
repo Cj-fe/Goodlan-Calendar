@@ -1,5 +1,6 @@
 from includes.config import DatabaseConfig
 import uuid
+import bcrypt
 from datetime import datetime
 
 class ActivityService:
