@@ -716,6 +716,29 @@
                 $('.task-item').on('click', function () {
                     NotificationManager.showNotification('info', 'Task: ' + $(this).find('.task-title').text());
                 });
+
+                // Long press detection
+                let longPressTimer;
+                const longPressDuration = 500; // Duration in milliseconds
+
+                $('.task-item').on('mousedown touchstart', function (e) {
+                    const taskItem = $(this);
+                    longPressTimer = setTimeout(function () {
+                        showContextMenu(e, taskItem);
+                    }, longPressDuration);
+                }).on('mouseup mouseleave touchend touchcancel', function () {
+                    clearTimeout(longPressTimer);
+                });
+
+                function showContextMenu(e, taskItem) {
+                    e.preventDefault();
+                    const taskId = taskItem.data('task-id');
+                    $('#context-menu').css({
+                        display: 'block',
+                        left: e.pageX || e.originalEvent.touches[0].pageX,
+                        top: e.pageY || e.originalEvent.touches[0].pageY
+                    }).data('task-id', taskId);
+                }
             }
 
             function fetchActivities() {
