@@ -69,7 +69,31 @@ def insert_activity():
         }), 500
 
 
-@app.route('/fetch-activity/<activity_id>', methods=['GET'])
+@app.route('/fetch-activities', methods=['GET'])
+def fetch_activities():
+    try:
+        activity_service = ActivityService()
+        result = activity_service.fetch_activities()
+
+        if result["success"]:
+            return jsonify({
+                "success": True,
+                "activities": result["activities"]
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": result["message"]
+            }), 500
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+    
+
+@app.route('/fetch_activity_by_id/<activity_id>', methods=['GET'])
 def fetch_activity_by_id(activity_id):
     """
     Fetch a specific activity by its ID.
