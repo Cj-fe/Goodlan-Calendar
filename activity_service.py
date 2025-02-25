@@ -94,7 +94,7 @@ class ActivityService:
 
     def check_code(self, code):
         """
-        Check if the provided code exists in the web_development_team_code table.
+        Check if the provided code matches any hashed code in the web_development_team_code table.
 
         Parameters:
         code (str): The code to check.
@@ -111,21 +111,24 @@ class ActivityService:
         try:
             cursor = self.db.connection.cursor(dictionary=True)
 
-            # Check if the code exists
-            check_query = "SELECT * FROM web_development_team_code WHERE code = %s"
-            cursor.execute(check_query, (code,))
-            result = cursor.fetchone()
+            # Fetch all hashed codes from the table
+            check_query = "SELECT code FROM web_development_team_code"
+            cursor.execute(check_query)
+            results = cursor.fetchall()
 
-            if result:
-                return {
-                    "success": True,
-                    "message": "Code is valid"
-                }
-            else:
-                return {
-                    "success": False,
-                    "message": "Invalid code"
-                }
+            # Verify the provided code against each hashed code
+            for result in results:
+                hashed_code = result['code'].encode('utf-8')
+                if bcrypt.checkpw(code.encode('utf-8'), hashed_code):
+                    return {
+                        "success": True,
+                        "message": "Code is valid"
+                    }
+
+            return {
+                "success": False,
+                "message": "Invalid code"
+            }
 
         except Exception as e:
             return {
