@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Calendar View</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .calendar-container {
+            max-width: 100%;
+            margin: 20px auto;
+        }
+
+        .calendar-card {
+            background-color: transparent;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: white;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .task-title {
+            font-weight: 500;
+            margin: 0;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .task-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-navigation {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .calendar-navigation .btn {
+            /* Make all buttons the same height */
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 38px;
+        }
+
+        /* Month-year display styling */
+        .month-year-display {
+            font-size: 1.25rem;
+            font-weight: 500;
+            padding: 0 15px;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .calendar-table th {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 500;
+        }
+
+        .calendar-table td {
+            height: 100px;
+            width: 14.28%;
+            vertical-align: top;
+            padding: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .date-number {
+            font-weight: 400;
+            margin-bottom: 5px;
+        }
+
+        .date-cell {
+            position: relative;
+            height: 100%;
+        }
+
+        .other-month {
+            background-color: rgba(248, 249, 250, 0.5);
+            color: #adb5bd;
+        }
+
+        .today {
+            background-color: #f0f7ff;
+        }
+
+        .selected {
+            background-color: #e2f0ff;
+        }
+
+        .event {
+            padding: 4px 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        .event-blue {
+            background-color: #0d6efd;
+        }
+
+        .event-yellow {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .event-green {
+            background-color: #198754;
+        }
+
+        .event-red {
+            background-color: #dc3545;
+        }
+
+        /* Task colors */
+        .task-blue {
+            border-left-color: #0d6efd;
+        }
+
+        .task-green {
+            border-left-color: #198754;
+        }
+
+        .task-yellow {
+            border-left-color: #ffc107;
+        }
+
+        .task-red {
+            border-left-color: #dc3545;
+        }
+
+        /* Mobile Task List (only visible on small screens) */
+        .mobile-task-list {
+            display: none;
+        }
+
+        /* Add event button styling */
+        .add-event-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+        }
+
+        .add-event-btn:hover {
+            background-color: #218838;
+            color: white;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .calendar-navigation {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .calendar-table th {
+                padding: 5px 2px;
+                font-size: 14px;
+            }
+
+            .calendar-table td {
+                height: 80px;
+                padding: 2px;
+            }
+
+            .date-number {
+                font-size: 14px;
+            }
+
+            .event {
+                padding: 2px 4px;
+                font-size: 10px;
+            }
+        }
+
+        /* Mobile view specific styles */
+        @media (max-width: 480px) {
+            .day-name-full {
+                display: none;
+            }
+
+            .day-name-short {
+                display: inline;
+            }
+
+            .calendar-table td {
+                height: 40px;
+                width: 14.28%;
+                aspect-ratio: 1/1;
+                text-align: center;
+                vertical-align: middle;
+                position: relative;
+            }
+
+            .date-cell {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+            }
+
+            .date-number {
+                margin-bottom: 0;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            /* Hide events in mobile view */
+            .calendar-body.mobile-hide-events .event {
+                display: none;
+            }
+
+            /* Show task list below calendar in mobile view */
+            .mobile-task-list {
+                display: block;
+                margin-top: 30px;
+            }
+
+            .mobile-task-list h3 {
+                font-size: 18px;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #dee2e6;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid mt-3">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h2 id="month-year">Loading...</h2>
+            </div>
+
+            <div class="calendar-navigation">
+                <button id="prev-month" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar-minus"></i>
+                </button>
+                <button id="today-btn" class="btn btn-outline-secondary">Today</button>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                        Month
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" data-view="month">Month</a></li>
+                        <li><a class="dropdown-item" href="#" data-view="week">Week</a></li>
+                        <li><a class="dropdown-item" href="#" data-view="day">Day</a></li>
+                    </ul>
+                </div>
+                <button id="next-month" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar-plus"></i>
+                </button>
+                <button id="add-event-btn" class="btn add-event-btn">
+                    <i class="bi bi-plus-circle me-1"></i> Add Event
+                </button>
+            </div>
+
+            <div class="calendar-card">
+                <div class="table-responsive">
+                    <table class="calendar-table">
+                        <thead>
+                            <tr>
+                                <th><span class="day-name-full">Sunday</span><span
+                                        class="day-name-short d-none">Sun</span></th>
+                                <th><span class="day-name-full">Monday</span><span
+                                        class="day-name-short d-none">Mon</span></th>
+                                <th><span class="day-name-full">Tuesday</span><span
+                                        class="day-name-short d-none">Tue</span></th>
+                                <th><span class="day-name-full">Wednesday</span><span
+                                        class="day-name-short d-none">Wed</span></th>
+                                <th><span class="day-name-full">Thursday</span><span
+                                        class="day-name-short d-none">Thu</span></th>
+                                <th><span class="day-name-full">Friday</span><span
+                                        class="day-name-short d-none">Fri</span></th>
+                                <th><span class="day-name-full">Saturday</span><span
+                                        class="day-name-short d-none">Sat</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="calendar-body" class="calendar-body">
+                            <!-- Calendar will be generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Mobile Task List - shown only on small screens -->
+            <div id="mobile-task-list" class="mobile-task-list">
+                <h3>Tasks for February 2025</h3>
+                <div id="mobile-tasks-container">
+                    <!-- Task items will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <script>
+        $(document).ready(function () {
+            // Tasks data - similar to your events but with more details
+            const tasks = [
+                { id: 1, date: '2025-02-25', title: 'Review Project Proposal', color: 'blue' },
+                { id: 2, date: '2025-02-25', title: 'Update Documentation', color: 'green' },
+                { id: 3, date: '2025-02-26', title: 'Team Meeting Preparation', color: 'yellow' },
+                { id: 4, date: '2025-02-14', title: 'Valentine\'s Day Celebration', color: 'red' },
+                { id: 5, date: '2025-02-17', title: 'Client Presentation', color: 'blue' },
+                { id: 6, date: '2025-02-03', title: 'Weekly Planning Session', color: 'green' },
+                { id: 7, date: '2025-02-28', title: 'End of Month Report', color: 'blue' }
+            ];
+
+            // Current displayed date
+            let currentDate = moment();
+            let isMobileView = false;
+            let selectedDate = null;
+
+            // Function to handle responsive design
+            function handleResponsive() {
+                isMobileView = window.innerWidth <= 480;
+
+                if (isMobileView) {
+                    $('.day-name-full').addClass('d-none');
+                    $('.day-name-short').removeClass('d-none');
+                    $('.calendar-body').addClass('mobile-hide-events');
+                    renderMobileTaskList();
+                } else {
+                    $('.day-name-full').removeClass('d-none');
+                    $('.day-name-short').addClass('d-none');
+                    $('.calendar-body').removeClass('mobile-hide-events');
+                }
+
+                // Re-render the calendar to adjust to the new view
+                renderCalendar();
+            }
+
+            // Call on load and resize
+            $(window).resize(handleResponsive);
+
+            // Function to render calendar
+            function renderCalendar() {
+                const firstDay = moment(currentDate).startOf('month').startOf('week');
+                const lastDay = moment(currentDate).endOf('month').endOf('week');
+
+                // Update headers
+                $('#month-year').text(currentDate.format('MMMM YYYY'));
+                $('#nav-month-year').text(currentDate.format('MMMM YYYY'));
+
+                // Clear table
+                $('#calendar-body').empty();
+
+                // Generate calendar rows
+                let date = moment(firstDay);
+                while (date.isBefore(lastDay)) {
+                    let row = $('<tr></tr>');
+
+                    // Create 7 days for the week
+                    for (let i = 0; i < 7; i++) {
+                        const cellDate = moment(date);
+                        const isToday = cellDate.isSame(moment(), 'day');
+                        const isOtherMonth = !cellDate.isSame(currentDate, 'month');
+                        const isSelected = selectedDate && cellDate.isSame(selectedDate, 'day');
+
+                        let cell = $('<td></td>');
+                        if (isOtherMonth) cell.addClass('other-month');
+                        if (isToday) cell.addClass('today');
+                        if (isSelected) cell.addClass('selected');
+
+                        let dateCell = $('<div class="date-cell"></div>');
+                        let dateNumber = $('<div class="date-number"></div>').text(cellDate.date());
+                        dateCell.append(dateNumber);
+
+                        // Add events for this date (will be hidden in mobile view via CSS)
+                        if (!isMobileView) {
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
+                                    let eventDiv = $('<div></div>')
+                                        .addClass('event')
+                                        .addClass('event-' + task.color)
+                                        .text(task.title)
+                                        .attr('data-task-id', task.id);
+                                    dateCell.append(eventDiv);
+                                }
+                            });
+                        }
+
+                        cell.append(dateCell);
+                        row.append(cell);
+
+                        date.add(1, 'day');
+                    }
+
+                    $('#calendar-body').append(row);
+                }
+
+                // Add click event to cells
+                $('.calendar-table td').click(function () {
+                    $('.calendar-table td').removeClass('selected');
+                    $(this).addClass('selected');
+                    
+                    // Get the day number from the clicked cell
+                    const dayNumber = parseInt($(this).find('.date-number').text());
+                    
+                    // Create a new date based on the current month and clicked day
+                    selectedDate = moment(currentDate).date(dayNumber);
+                    
+                    // If it's another month, adjust accordingly
+                    if ($(this).hasClass('other-month')) {
+                        if (dayNumber > 20) { // Likely previous month
+                            selectedDate = moment(currentDate).subtract(1, 'month').date(dayNumber);
+                        } else { // Likely next month
+                            selectedDate = moment(currentDate).add(1, 'month').date(dayNumber);
+                        }
+                    }
+                });
+
+                // Add tooltip to events
+                $('.event').on('click', function (e) {
+                    e.stopPropagation();
+                    alert('Task: ' + $(this).text());
+                });
+            }
+
+            // Function to render mobile task list
+            function renderMobileTaskList() {
+                const tasksContainer = $('#mobile-tasks-container');
+                tasksContainer.empty();
+
+                // Update header for mobile task list
+                $('#mobile-task-list h3').text('Tasks for ' + currentDate.format('MMMM YYYY'));
+
+                // Filter tasks for the current month
+                const monthTasks = tasks.filter(task =>
+                    moment(task.date).isSame(currentDate, 'month')
+                );
+
+                if (monthTasks.length === 0) {
+                    tasksContainer.append('<p class="text-center text-muted my-4">No tasks scheduled this month</p>');
+                    return;
+                }
+
+                // Sort tasks by date
+                monthTasks.sort((a, b) => moment(a.date).diff(moment(b.date)));
+
+                // Group tasks by date
+                const groupedTasks = {};
+                monthTasks.forEach(task => {
+                    const dateKey = task.date;
+                    if (!groupedTasks[dateKey]) {
+                        groupedTasks[dateKey] = [];
+                    }
+                    groupedTasks[dateKey].push(task);
+                });
+
+                // Create task items
+                Object.keys(groupedTasks).forEach(dateKey => {
+                    const formattedDate = moment(dateKey).format('ddd, MMM D');
+
+                    groupedTasks[dateKey].forEach(task => {
+                        const taskItem = $('<div class="task-item task-' + task.color + '"></div>');
+                        const taskContent = $(`
+                          <div>
+                            <h5 class="task-title">${task.title}</h5>
+                            <div class="task-date">${formattedDate}</div>
+                          </div>
+                        `);
+
+                        taskItem.append(taskContent);
+                        tasksContainer.append(taskItem);
+                    });
+                });
+
+                // Add click event to the mobile task items
+                $('.task-item').on('click', function () {
+                    alert('Task: ' + $(this).find('.task-title').text());
+                });
+            }
+
+            // Initial render - call handleResponsive first to set up the view
+            handleResponsive();
+
+            // Navigation buttons
+            $('#prev-month').click(function () {
+                currentDate.subtract(1, 'month');
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
+
+            $('#next-month').click(function () {
+                currentDate.add(1, 'month');
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
+
+            $('#today-btn').click(function () {
+                currentDate = moment();
+                selectedDate = moment();
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
+
+            // Add Event button functionality
+            $('#add-event-btn').click(function() {
+                const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
+                const modalHtml = `
+                  <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Add New Event</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <form id="eventForm">
+                            <div class="mb-3">
+                              <label for="eventTitle" class="form-label">Event Title</label>
+                              <input type="text" class="form-control" id="eventTitle" required>
+                            </div>
+                            <div class="mb-3">
+                              <label for="eventDate" class="form-label">Date</label>
+                              <input type="date" class="form-control" id="eventDate" value="${dateString}" required>
+                            </div>
+                            <div class="mb-3">
+                              <label for="eventColor" class="form-label">Color</label>
+                              <select class="form-select" id="eventColor">
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="yellow">Yellow</option>
+                                <option value="red">Red</option>
+                              </select>
+                            </div>
+                          </form>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="button" class="btn btn-primary" id="saveEventBtn">Save Event</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+                
+                // Remove existing modal if any
+                $('#addEventModal').remove();
+                
+                // Add modal to body
+                $('body').append(modalHtml);
+                
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
+                modal.show();
+                
+                // Save event handler
+                $('#saveEventBtn').click(function() {
+                    const title = $('#eventTitle').val();
+                    const date = $('#eventDate').val();
+                    const color = $('#eventColor').val();
+                    
+                    if (title && date) {
+                        // Add new task
+                        const newTask = {
+                            id: tasks.length + 1,
+                            date: date,
+                            title: title,
+                            color: color
+                        };
+                        
+                        tasks.push(newTask);
+                        
+                        // Close modal
+                        modal.hide();
+                        
+                        // Re-render calendar and task list
+                        renderCalendar();
+                        if (isMobileView) {
+                            renderMobileTaskList();
+                        }
+                        
+                        // Show success message
+                        alert('Event added successfully!');
+                    } else {
+                        alert('Please fill in all required fields');
+                    }
+                });
+            });
+
+            // View change (placeholder functionality)
+            $('.dropdown-item').click(function () {
+                const view = $(this).data('view');
+                alert('Changing to ' + view + ' view. This functionality is not implemented in this demo.');
+            });
+        });
+    </script>
+</body>
+
+</html>
