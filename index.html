@@ -789,140 +789,137 @@
             });
 
             $('#add-event-btn').click(function () {
-                const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
-                const modalHtml = `
-      <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Add New Activity</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
+        const modalHtml = `
+            <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Activity</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="eventForm">
+                                <div class="mb-3">
+                                    <label for="eventTitle" class="form-label">Activity Title</label>
+                                    <input type="text" class="form-control" id="eventTitle" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="eventDate" class="form-label">Date Start</label>
+                                    <input type="date" class="form-control" id="eventDate" value="${dateString}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="eventDateEnd" class="form-label">Date End</label>
+                                    <input type="date" class="form-control" id="eventDateEnd" value="${dateString}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="eventColor" class="form-label">Color</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="text" id="eventColorPicker" class="form-control">
+                                        <div id="colorPreview" class="color-preview ms-2"></div>
+                                    </div>
+                                    <div class="mt-2 text-muted small">Select a color or use one of the presets below</div>
+                                    <div class="d-flex mt-2 gap-2">
+                                        <button type="button" class="btn btn-sm btn-primary color-preset" data-color="#0d6efd">Blue</button>
+                                        <button type="button" class="btn btn-sm btn-success color-preset" data-color="#198754">Green</button>
+                                        <button type="button" class="btn btn-sm btn-warning color-preset" data-color="#ffc107">Yellow</button>
+                                        <button type="button" class="btn btn-sm btn-danger color-preset" data-color="#dc3545">Red</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="saveEventBtn">Save Activity</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-              <form id="eventForm">
-                <div class="mb-3">
-                  <label for="eventTitle" class="form-label">Activity Title</label>
-                  <input type="text" class="form-control" id="eventTitle" required>
-                </div>
-                <div class="mb-3">
-                  <label for="eventDate" class="form-label">Date Start</label>
-                  <input type="date" class="form-control" id="eventDate" value="${dateString}" required>
-                </div>
-                <div class="mb-3">
-                  <label for="eventDateEnd" class="form-label">Date End</label>
-                  <input type="date" class="form-control" id="eventDateEnd" value="${dateString}" required>
-                </div>
-                <div class="mb-3">
-                  <label for="eventColor" class="form-label">Color</label>
-                  <div class="d-flex align-items-center">
-                    <input type="text" id="eventColorPicker" class="form-control">
-                    <div id="colorPreview" class="color-preview ms-2"></div>
-                  </div>
-                  <div class="mt-2 text-muted small">Select a color or use one of the presets below</div>
-                  <div class="d-flex mt-2 gap-2">
-                    <button type="button" class="btn btn-sm btn-primary color-preset" data-color="#0d6efd">Blue</button>
-                    <button type="button" class="btn btn-sm btn-success color-preset" data-color="#198754">Green</button>
-                    <button type="button" class="btn btn-sm btn-warning color-preset" data-color="#ffc107">Yellow</button>
-                    <button type="button" class="btn btn-sm btn-danger color-preset" data-color="#dc3545">Red</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-primary" id="saveEventBtn">Save Activity</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+        `;
 
-                $('#addEventModal').remove();
-                $('body').append(modalHtml);
+        $('#addEventModal').remove();
+        $('body').append(modalHtml);
 
-                $('#eventColorPicker').spectrum({
-                    color: "#0d6efd",
-                    showInput: true,
-                    preferredFormat: "hex",
-                    showPalette: true,
-                    palette: [
-                        ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
-                        ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
-                        ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
-                    ],
-                    change: function (color) {
-                        $('#colorPreview').css('background-color', color.toHexString());
-                    }
-                });
+        $('#eventColorPicker').spectrum({
+            color: "#0d6efd",
+            showInput: true,
+            preferredFormat: "hex",
+            showPalette: true,
+            palette: [
+                ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
+                ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
+                ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
+            ],
+            change: function (color) {
+                $('#colorPreview').css('background-color', color.toHexString());
+            }
+        });
 
-                $('#colorPreview').css('background-color', '#0d6efd');
+        $('#colorPreview').css('background-color', '#0d6efd');
 
-                $('.color-preset').click(function () {
-                    const color = $(this).data('color');
-                    $('#eventColorPicker').spectrum('set', color);
-                    $('#colorPreview').css('background-color', color);
-                });
+        $('.color-preset').click(function () {
+            const color = $(this).data('color');
+            $('#eventColorPicker').spectrum('set', color);
+            $('#colorPreview').css('background-color', color);
+        });
 
-                const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
-                modal.show();
+        const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
+        modal.show();
 
-                $('#saveEventBtn').click(function () {
-                    const title = $('#eventTitle').val();
-                    const date = $('#eventDate').val();
-                    const eventDateEnd = $('#eventDateEnd').val();
-                    const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
+        $('#saveEventBtn').click(function (event) {
+            event.preventDefault(); // Prevent default form submission
 
-                    if (title && date && eventDateEnd) {
-                        showPasswordModal(function (isAuthenticated) {
-                            if (isAuthenticated) {
-                                $.ajax({
-                                    url: '/insert-activity',
-                                    method: 'POST',
-                                    contentType: 'application/json',
-                                    data: JSON.stringify({
+            const title = $('#eventTitle').val();
+            const date = $('#eventDate').val();
+            const eventDateEnd = $('#eventDateEnd').val();
+            const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
+
+            if (title && date && eventDateEnd) {
+                showPasswordModal(function (isAuthenticated) {
+                    if (isAuthenticated) {
+                        $.ajax({
+                            url: '/insert-activity',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                title: title,
+                                activity_date: date,
+                                activity_end: eventDateEnd,
+                                color_hex: colorHex
+                            }),
+                            success: function (response) {
+                                if (response.success) {
+                                    NotificationManager.showNotification('success', 'Activity added successfully!');
+                                    tasks.push({
+                                        id: tasks.length + 1,
+                                        date: date,
+                                        eventDateEnd: eventDateEnd,
                                         title: title,
-                                        activity_date: date,
-                                        activity_end: eventDateEnd,
-                                        color_hex: colorHex
-                                    }),
-                                    success: function (response) {
-                                        if (response.success) {
-                                            NotificationManager.showNotification('success', 'Activity added successfully!');
-                                            tasks.push({
-                                                id: tasks.length + 1,
-                                                date: date,
-                                                eventDateEnd: eventDateEnd,
-                                                title: title,
-                                                colorHex: colorHex
-                                            });
-                                            renderCalendar();
-                                            if (isMobileView) {
-                                                renderMobileTaskList();
-                                            }
-                                            $('#addEventModal').modal('hide'); // Hide the modal
-                                            $('#eventForm')[0].reset(); // Reset the form
-                                            $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
-                                        } else {
-                                            NotificationManager.showNotification('error', 'Error: ' + response.message);
-                                        }
-                                    },
-                                    error: function (jqXHR) {
-                                        NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
+                                        colorHex: colorHex
+                                    });
+                                    renderCalendar();
+                                    if (isMobileView) {
+                                        renderMobileTaskList();
                                     }
-                                });
+                                    modal.hide(); // Hide the modal
+                                    $('#eventForm')[0].reset(); // Reset the form
+                                    $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
+                                } else {
+                                    NotificationManager.showNotification('error', 'Error: ' + response.message);
+                                }
+                            },
+                            error: function (jqXHR) {
+                                NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
                             }
                         });
-                    } else {
-                        NotificationManager.showNotification('warning', 'Please fill in all required fields');
                     }
                 });
-            });
-
-            $('.dropdown-item').click(function () {
-                const view = $(this).data('view');
-                NotificationManager.showNotification('info', 'Changing to ' + view + ' view. This functionality is not implemented in this demo.');
-            });
+            } else {
+                NotificationManager.showNotification('warning', 'Please fill in all required fields');
+            }
         });
+    });
+    });
     </script>
 </body>
 
