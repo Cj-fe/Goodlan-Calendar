@@ -7,6 +7,7 @@
     <title>Enhanced Calendar View</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -360,9 +361,59 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/js/bootstrap-notify.min.js"></script>
     <script>
+        const NotificationManager = {
+            mobileNotificationCount: 0,
+            maxMobileNotifications: 2,
+            isMobile: () => window.innerWidth <= 768,
+
+            showNotification: function (type, message) {
+                if (this.isMobile() && this.mobileNotificationCount >= this.maxMobileNotifications) {
+                    const notifications = document.querySelectorAll('.bootstrap-notify-container');
+                    if (notifications.length > 0) {
+                        notifications[0].remove();
+                        this.mobileNotificationCount--;
+                    }
+                }
+
+                if (this.isMobile()) {
+                    this.mobileNotificationCount++;
+                }
+
+                $.notify({
+                    message: message,
+                    icon: type === 'success' ? 'bi bi-check-circle' : 'bi bi-exclamation-circle'
+                }, {
+                    type: type,
+                    allow_dismiss: true,
+                    newest_on_top: true,
+                    timer: 3000,
+                    placement: {
+                        from: 'top',
+                        align: this.isMobile() ? 'center' : 'right'
+                    },
+                    animate: {
+                        enter: 'animated bounceInDown',
+                        exit: 'animated bounceOutUp'
+                    },
+                    template:
+                        '<div data-notify="container" class="bootstrap-notify-container alert alert-{0}" role="alert">' +
+                        '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+                        '<div class="notification-content">' +
+                        '<span data-notify="icon"></span>' +
+                        '<span data-notify="message">{2}</span>' +
+                        '</div>' +
+                        '</div>',
+                    onClose: () => {
+                        if (this.isMobile()) {
+                            this.mobileNotificationCount--;
+                        }
+                    }
+                });
+            }
+        };
+
         $(document).ready(function () {
             const defaultColors = {
                 'blue': '#0d6efd',
@@ -486,7 +537,7 @@
 
                 $('.event').on('click', function (e) {
                     e.stopPropagation();
-                    alert('Task: ' + $(this).text());
+                    NotificationManager.showNotification('info', 'Task: ' + $(this).text());
                 });
             }
 
@@ -542,7 +593,7 @@
                 }
 
                 $('.task-item').on('click', function () {
-                    alert('Task: ' + $(this).find('.task-title').text());
+                    NotificationManager.showNotification('info', 'Task: ' + $(this).find('.task-title').text());
                 });
             }
 
@@ -555,11 +606,11 @@
                             const activities = response.activities;
                             updateCalendarWithActivities(activities);
                         } else {
-                            alert('Failed to fetch activities: ' + response.message);
+                            NotificationManager.showNotification('error', 'Failed to fetch activities: ' + response.message);
                         }
                     },
                     error: function (jqXHR) {
-                        alert('Error fetching activities: ' + jqXHR.responseText);
+                        NotificationManager.showNotification('error', 'Error fetching activities: ' + jqXHR.responseText);
                     }
                 });
             }
@@ -628,12 +679,12 @@
                                 passwordModal.hide();
                                 callback(true);
                             } else {
-                                alert('Incorrect code');
+                                NotificationManager.showNotification('error', 'Incorrect code');
                                 callback(false);
                             }
                         },
                         error: function (jqXHR) {
-                            alert('Error: ' + jqXHR.responseText);
+                            NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
                             callback(false);
                         }
                     });
@@ -772,7 +823,7 @@
                                     }),
                                     success: function (response) {
                                         if (response.success) {
-                                            alert('Event added successfully!');
+                                            NotificationManager.showNotification('success', 'Event added successfully!');
                                             tasks.push({
                                                 id: tasks.length + 1,
                                                 date: date,
@@ -786,24 +837,24 @@
                                             }
                                             modal.hide();
                                         } else {
-                                            alert('Error: ' + response.message);
+                                            NotificationManager.showNotification('error', 'Error: ' + response.message);
                                         }
                                     },
                                     error: function (jqXHR) {
-                                        alert('Error: ' + jqXHR.responseText);
+                                        NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
                                     }
                                 });
                             }
                         });
                     } else {
-                        alert('Please fill in all required fields');
+                        NotificationManager.showNotification('warning', 'Please fill in all required fields');
                     }
                 });
             });
 
             $('.dropdown-item').click(function () {
                 const view = $(this).data('view');
-                alert('Changing to ' + view + ' view. This functionality is not implemented in this demo.');
+                NotificationManager.showNotification('info', 'Changing to ' + view + ' view. This functionality is not implemented in this demo.');
             });
         });
     </script>
