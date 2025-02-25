@@ -455,7 +455,7 @@
     <script src="plugins/bootstrap-notify/bootstrap-notify.min.js"></script>
     <script src="plugins/node-waves/waves.js"></script>
     <script>
-        $(document).ready(function () {
+       $(document).ready(function () {
             const NotificationManager = {
                 mobileNotificationCount: 0,
                 maxMobileNotifications: 2,
@@ -861,6 +861,11 @@
                 // Show the modal
                 const modal = new bootstrap.Modal(document.getElementById('editEventModal'));
                 modal.show();
+
+                // Ensure the backdrop is removed when the modal is hidden
+                $('#editEventModal').on('hidden.bs.modal', function () {
+                    $('.modal-backdrop').remove();
+                });
             }
 
             handleResponsive();
@@ -1023,6 +1028,7 @@
                 });
             });
         });
+    
     </script>
 </body>
 
