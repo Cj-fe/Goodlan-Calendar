@@ -35,6 +35,7 @@ def insert_activity():
         title = data.get('title')
         activity_date = data.get('activity_date')
         color_hex = data.get('color_hex')
+        eventDateEnd = data.get('eventDateEnd')
 
         if not title or not activity_date or not color_hex:
             return jsonify({
@@ -43,7 +44,7 @@ def insert_activity():
             }), 400
 
         activity_service = ActivityService()
-        result = activity_service.insert_activity(title, activity_date, color_hex)
+        result = activity_service.insert_activity(title, activity_date, color_hex, eventDateEnd)
 
         if result["success"]:
             return jsonify({
