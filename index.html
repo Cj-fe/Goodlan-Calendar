@@ -687,8 +687,16 @@
 
                 $('#edit-task').click(function () {
                     $('#context-menu').hide();
-                    // Implement edit functionality here
-                    alert('Edit task: ' + currentTaskId);
+                    const task = tasks.find(t => t.id === currentEditTaskId);
+                    if (task) {
+                        $('#editEventTitle').val(task.title);
+                        $('#editEventDate').val(task.date);
+                        $('#editEventDateEnd').val(task.eventDateEnd);
+                        $('#editEventColorPicker').spectrum('set', task.colorHex);
+
+                        const editModal = new bootstrap.Modal(document.getElementById('editEventModal'));
+                        editModal.show();
+                    }
                 });
 
                 $('#delete-task').click(function () {
@@ -1038,19 +1046,7 @@
 
             let currentEditTaskId = null;
 
-            $('#edit-task').click(function () {
-                $('#context-menu').hide();
-                const task = tasks.find(t => t.id === currentEditTaskId);
-                if (task) {
-                    $('#editEventTitle').val(task.title);
-                    $('#editEventDate').val(task.date);
-                    $('#editEventDateEnd').val(task.eventDateEnd);
-                    $('#editEventColorPicker').spectrum('set', task.colorHex);
 
-                    const editModal = new bootstrap.Modal(document.getElementById('editEventModal'));
-                    editModal.show();
-                }
-            });
 
             $('#saveEditEventBtn').click(function () {
                 const title = $('#editEventTitle').val();
