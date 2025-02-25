@@ -340,7 +340,7 @@
             </div>
 
             <div id="mobile-task-list" class="mobile-task-list">
-                <h3>Activity for February 2025</h3>
+                <h3>Tasks for February 2025</h3>
                 <div id="mobile-tasks-container">
                     <!-- Task items will be added here -->
                 </div>
@@ -474,8 +474,6 @@
 
                     if (isMobileView) {
                         renderMobileTaskList();
-                    } else {
-                        displayNoRecentActivityMessage();
                     }
                 });
 
@@ -532,19 +530,13 @@
                     }
                 });
 
+                if (!selectedDate || !groupedTasks[selectedDate.format('YYYY-MM-DD')]) {
+                    tasksContainer.append('<p class="text-center text-muted my-4">No Recent Activity</p>');
+                }
+
                 $('.task-item').on('click', function () {
                     alert('Task: ' + $(this).find('.task-title').text());
                 });
-            }
-
-            function displayNoRecentActivityMessage() {
-                const selectedTasks = tasks.filter(task =>
-                    moment(task.date).isSame(selectedDate, 'day')
-                );
-
-                if (selectedTasks.length === 0) {
-                    alert('No Recent Activity');
-                }
             }
 
             function fetchActivities() {
