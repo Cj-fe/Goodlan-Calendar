@@ -831,9 +831,13 @@
             }
 
             function populateEditModal(activity) {
+                // Convert the date strings to the correct format if necessary
+                const activityDate = new Date(activity.activity).toISOString().split('T')[0];
+                const activityEndDate = new Date(activity.activity_end).toISOString().split('T')[0];
+
                 $('#editEventModal #editEventTitle').val(activity.title);
-                $('#editEventModal #editEventDate').val(activity.activity);
-                $('#editEventModal #editEventDateEnd').val(activity.activity_end);
+                $('#editEventModal #editEventDate').val(activityDate);
+                $('#editEventModal #editEventDateEnd').val(activityEndDate);
                 $('#editEventModal #editEventColorPicker').spectrum('set', activity.color_hex);
                 $('#editEventModal #editColorPreview').css('background-color', activity.color_hex);
 
