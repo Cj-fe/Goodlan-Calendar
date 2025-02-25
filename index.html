@@ -288,6 +288,67 @@
             align-items: center;
             min-height: calc(100% - 1rem);
         }
+
+
+        .bootstrap-notify-container {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            padding: 15px 35px 15px 15px !important;
+            max-width: 90% !important;
+            width: auto !important;
+            margin: 10px auto !important;
+            z-index: 1061 !important;
+        }
+
+        .bootstrap-notify-container.alert-success {
+            background-color: rgba(34, 197, 94, 0.95) !important;
+            color: white !important;
+        }
+
+        .bootstrap-notify-container.alert-danger {
+            background-color: rgba(239, 68, 68, 0.95) !important;
+            color: white !important;
+        }
+
+        .bootstrap-notify-container .close {
+            background: none !important;
+            border: none !important;
+            color: inherit !important;
+            opacity: 0.8;
+            text-shadow: none !important;
+            font-size: 1.25rem;
+            padding: 0 !important;
+            margin: 0 !important;
+            position: absolute !important;
+            right: 10px !important;
+            top: 6px !important;
+            transform: none !important;
+            line-height: 1 !important;
+        }
+
+        .bootstrap-notify-container .close:hover {
+            opacity: 1;
+        }
+
+        .bootstrap-notify-container .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bootstrap-notify-container [data-notify="icon"] {
+            display: inline-flex;
+            align-items: center;
+            font-size: 1.1em;
+        }
+
+        .bootstrap-notify-container [data-notify="message"] {
+            display: inline;
+            vertical-align: middle;
+        }
+
     </style>
 </head>
 
@@ -366,6 +427,8 @@
     <script src="notify-manager.js"></script>
     <script src="plugins/bootstrap-notify/bootstrap-notify.min.js"></script>
     <script src="plugins/node-waves/waves.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+
     <script>
     $(document).ready(function () {
       const defaultColors = {
