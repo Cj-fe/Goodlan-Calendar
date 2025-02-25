@@ -278,6 +278,13 @@
             }
 
         }
+
+        /* Center the modal vertically */
+        .modal-dialog-centered {
+            display: flex;
+            align-items: center;
+            min-height: calc(100% - 1rem);
+        }
     </style>
 </head>
 
@@ -576,7 +583,7 @@
             function showPasswordModal(callback) {
                 const passwordModalHtml = `
             <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
-              <div class="modal-dialog">
+              <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                   <div class="modal-header">
                     <h5 class="modal-title">Enter Code</h5>
@@ -605,6 +612,9 @@
                 const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
                 passwordModal.show();
 
+                // Hide the event form when the password modal is shown
+                $('#addEventModal').modal('hide');
+
                 $('#submitPasswordBtn').click(function () {
                     const code = $('#passwordInput').val();
                     $.ajax({
@@ -626,6 +636,11 @@
                             callback(false);
                         }
                     });
+                });
+
+                // Show the event form again if the password modal is canceled
+                $('#passwordModal').on('hidden.bs.modal', function () {
+                    $('#addEventModal').modal('show');
                 });
             }
 
