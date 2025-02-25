@@ -90,3 +90,49 @@ class ActivityService:
         finally:
             cursor.close()
             self.db.disconnect()
+
+
+    def check_code(self, code):
+        """
+        Check if the provided code exists in the web_development_team_code table.
+
+        Parameters:
+        code (str): The code to check.
+
+        Returns:
+        dict: Contains success status and any error message.
+        """
+        if not self.db.connect():
+            return {
+                "success": False,
+                "message": "Database connection failed"
+            }
+
+        try:
+            cursor = self.db.connection.cursor(dictionary=True)
+
+            # Check if the code exists
+            check_query = "SELECT * FROM web_development_team_code WHERE code = %s"
+            cursor.execute(check_query, (code,))
+            result = cursor.fetchone()
+
+            if result:
+                return {
+                    "success": True,
+                    "message": "Code is valid"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "Invalid code"
+                }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error checking code: {str(e)}"
+            }
+
+        finally:
+            cursor.close()
+            self.db.disconnect()
