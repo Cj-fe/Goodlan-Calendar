@@ -140,3 +140,49 @@ class ActivityService:
         finally:
             cursor.close()
             self.db.disconnect()
+    def fetch_activity_by_id(self, activity_id):
+            """
+            Fetch a specific activity by its ID.
+    
+            Parameters:
+            activity_id (str): The ID of the activity to fetch.
+    
+            Returns:
+            dict: Contains success status and the activity details or an error message.
+            """
+            if not self.db.connect():
+                return {
+                    "success": False,
+                    "message": "Database connection failed"
+                }
+    
+            try:
+                cursor = self.db.connection.cursor(dictionary=True)
+    
+                # Fetch the activity by ID
+                fetch_query = "SELECT id, title, activity, activity_end, color_hex FROM activity WHERE id = %s"
+                cursor.execute(fetch_query, (activity_id,))
+                activity = cursor.fetchone()
+    
+                if activity:
+                    return {
+                        "success": True,
+                        "activity": activity
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": "Activity not found"
+                    }
+    
+            except Exception as e:
+                return {
+                    "success": False,
+                    "message": f"Error fetching activity: {str(e)}"
+                }
+    
+            finally:
+                cursor.close()
+                self.db.disconnect()
+    
+    
