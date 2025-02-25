@@ -694,11 +694,7 @@
             $('#context-menu').hide();
         });
 
-        $('#edit-task').click(function () {
-            $('#context-menu').hide();
-            fetchActivityById(currentTaskId);
-        });
-
+    
         $('#delete-task').click(function () {
             $('#context-menu').hide();
             // Implement delete functionality here
@@ -914,6 +910,15 @@
             }
         });
     }
+
+    // Event listener for context menu edit option
+    $('#edit-task').click(function () {
+        $('#context-menu').hide();
+        const taskId = $('#context-menu').data('task-id');
+        fetchActivityById(taskId);
+    });
+
+
 
     handleResponsive();
     fetchActivities();
