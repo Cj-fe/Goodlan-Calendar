@@ -249,7 +249,8 @@
                 justify-content: center;
                 align-items: center;
                 height: 100%;
-                border: 2px solid transparent; /* Default border */
+                border: 2px solid transparent;
+                /* Default border */
             }
 
             .date-number {
@@ -275,7 +276,7 @@
                 padding-bottom: 10px;
                 border-bottom: 1px solid #dee2e6;
             }
-            
+
         }
     </style>
 </head>
@@ -354,7 +355,7 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <script>
-          $(document).ready(function () {
+             $(document).ready(function () {
             const defaultColors = {
                 'blue': '#0d6efd',
                 'green': '#198754',
@@ -511,7 +512,7 @@
                 Object.keys(groupedTasks).forEach(dateKey => {
                     const formattedDate = moment(dateKey).format('ddd, MMM D');
 
-                    if (selectedDate && moment(dateKey).isSame(selectedDate, 'day')) {
+                    if (!selectedDate || moment(dateKey).isSame(selectedDate, 'day')) {
                         groupedTasks[dateKey].forEach(task => {
                             const taskItem = $('<div class="task-item"></div>')
                                 .css('border-left-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
@@ -590,7 +591,7 @@
 
             $('#today-btn').click(function () {
                 currentDate = moment();
-                selectedDate = moment();
+                selectedDate = null; // Reset selected date to show all tasks
                 renderCalendar();
                 if (isMobileView) {
                     renderMobileTaskList();
