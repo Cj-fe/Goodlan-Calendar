@@ -839,33 +839,37 @@
                     const colorHex = $('#editEventColorPicker').spectrum('get').toHexString();
 
                     if (title && date) {
-                        $.ajax({
-                            url: '/update-activity',
-                            method: 'PUT',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                id: taskId,
-                                title: title,
-                                date: date,
-                                colorHex: colorHex
-                            }),
-                            success: function (response) {
-                                if (response.success) {
-                                    task.title = title;
-                                    task.date = date;
-                                    task.colorHex = colorHex;
-                                    renderCalendar();
-                                    if (isMobileView) {
-                                        renderMobileTaskList();
+                        showPasswordModal(function (isAuthenticated) {
+                            if (isAuthenticated) {
+                                $.ajax({
+                                    url: '/update-activity',
+                                    method: 'PUT',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify({
+                                        id: taskId,
+                                        title: title,
+                                        date: date,
+                                        colorHex: colorHex
+                                    }),
+                                    success: function (response) {
+                                        if (response.success) {
+                                            task.title = title;
+                                            task.date = date;
+                                            task.colorHex = colorHex;
+                                            renderCalendar();
+                                            if (isMobileView) {
+                                                renderMobileTaskList();
+                                            }
+                                            modal.hide();
+                                            NotificationManager.showNotification('success', 'Activity updated successfully!');
+                                        } else {
+                                            NotificationManager.showNotification('error', 'Failed to update activity: ' + response.message);
+                                        }
+                                    },
+                                    error: function (jqXHR) {
+                                        NotificationManager.showNotification('error', 'Error updating activity: ' + jqXHR.responseText);
                                     }
-                                    modal.hide();
-                                    NotificationManager.showNotification('success', 'Activity updated successfully!');
-                                } else {
-                                    NotificationManager.showNotification('error', 'Failed to update activity: ' + response.message);
-                                }
-                            },
-                            error: function (jqXHR) {
-                                NotificationManager.showNotification('error', 'Error updating activity: ' + jqXHR.responseText);
+                                });
                             }
                         });
                     } else {
@@ -873,6 +877,7 @@
                     }
                 });
             }
+
 
 
             function deleteTask(taskId) {
