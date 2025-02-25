@@ -550,6 +550,26 @@
                 'red': '#dc3545'
             };
 
+            function initializeColorPicker(elementId) {
+                $(elementId).spectrum({
+                    color: "#0d6efd",
+                    showInput: true,
+                    preferredFormat: "hex",
+                    showPalette: true,
+                    palette: [
+                        ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
+                        ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
+                        ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
+                    ],
+                    change: function (color) {
+                        $('#colorPreview').css('background-color', color.toHexString());
+                    }
+                });
+            }
+
+            initializeColorPicker('#eventColorPicker');
+            initializeColorPicker('#editEventColorPicker');
+
             const tasks = [];
 
             let currentDate = moment();
