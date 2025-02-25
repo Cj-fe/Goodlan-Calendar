@@ -245,3 +245,42 @@ class ActivityService:
         finally:
             cursor.close()
             self.db.disconnect()
+
+    def delete_activity(self, activity_id):
+        """
+        Delete an activity record from the activity table.
+
+        Parameters:
+        activity_id (str): The unique ID of the activity to delete.
+
+        Returns:
+        dict: Contains success status and any error message.
+        """
+        if not self.db.connect():
+            return {
+                "success": False,
+                "message": "Database connection failed"
+            }
+
+        try:
+            cursor = self.db.connection.cursor(dictionary=True)
+
+            # Delete the activity record
+            delete_query = "DELETE FROM activity WHERE id = %s"
+            cursor.execute(delete_query, (activity_id,))
+            self.db.connection.commit()
+
+            return {
+                "success": True,
+                "message": "Activity deleted successfully"
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error deleting activity: {str(e)}"
+            }
+
+        finally:
+            cursor.close()
+            self.db.disconnect()
