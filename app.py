@@ -122,6 +122,30 @@ def check_code():
             "success": False,
             "message": str(e)
         }), 500
+    
+
+@app.route('/fetch-activity/<activity_id>', methods=['GET'])
+def fetch_activity_by_id(activity_id):
+    try:
+        activity_service = ActivityService()
+        result = activity_service.fetch_activity_by_id(activity_id)
+
+        if result["success"]:
+            return jsonify({
+                "success": True,
+                "activity": result["activity"]
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": result["message"]
+            }), 404
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
 @app.route('/update-activity', methods=['PUT'])
 def update_activity():

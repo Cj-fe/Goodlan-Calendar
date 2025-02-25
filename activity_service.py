@@ -91,6 +91,51 @@ class ActivityService:
             cursor.close()
             self.db.disconnect()
 
+    def fetch_activity_by_id(self, activity_id):
+        """
+        Fetch a specific activity by its ID from the activity table.
+
+        Parameters:
+        activity_id (str): The unique ID of the activity to fetch.
+
+        Returns:
+        dict: Contains success status and the activity details or an error message.
+        """
+        if not self.db.connect():
+            return {
+                "success": False,
+                "message": "Database connection failed"
+            }
+
+        try:
+            cursor = self.db.connection.cursor(dictionary=True)
+
+            # Fetch the activity by ID
+            fetch_query = "SELECT id, title, activity, activity_end, color_hex, created_at FROM activity WHERE id = %s"
+            cursor.execute(fetch_query, (activity_id,))
+            activity = cursor.fetchone()
+
+            if activity:
+                return {
+                    "success": True,
+                    "activity": activity
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "Activity not found"
+                }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error fetching activity: {str(e)}"
+            }
+
+        finally:
+            cursor.close()
+            self.db.disconnect()
+
     def check_code(self, code):
         """
         Check if the provided code matches any hashed code in the web_development_team_code table.
