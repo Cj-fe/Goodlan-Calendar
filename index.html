@@ -1005,34 +1005,6 @@
                 });
             }
 
-            handleResponsive();
-            fetchActivities();
-
-            $('#prev-month').click(function () {
-                currentDate.subtract(1, 'month');
-                renderCalendar();
-                if (isMobileView) {
-                    renderMobileTaskList();
-                }
-            });
-
-            $('#next-month').click(function () {
-                currentDate.add(1, 'month');
-                renderCalendar();
-                if (isMobileView) {
-                    renderMobileTaskList();
-                }
-            });
-
-            $('#today-btn').click(function () {
-                currentDate = moment();
-                selectedDate = null;
-                renderCalendar();
-                if (isMobileView) {
-                    renderMobileTaskList();
-                }
-            });
-
             
             $('#add-event-btn').click(function () {
                 const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
