@@ -482,7 +482,7 @@
             </div>
         </div>
     </div>
-</div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -492,333 +492,335 @@
     <script src="plugins/bootstrap-notify/bootstrap-notify.min.js"></script>
     <script src="plugins/node-waves/waves.js"></script>
     <script>
-     $(document).ready(function () {
-    const NotificationManager = {
-      mobileNotificationCount: 0,
-      maxMobileNotifications: 2,
-      isMobile: () => window.innerWidth <= 768,
+        $(document).ready(function () {
+            const NotificationManager = {
+                mobileNotificationCount: 0,
+                maxMobileNotifications: 2,
+                isMobile: () => window.innerWidth <= 768,
 
-      showNotification: function (type, message) {
-        if (this.isMobile() && this.mobileNotificationCount >= this.maxMobileNotifications) {
-          const notifications = document.querySelectorAll('.bootstrap-notify-container');
-          if (notifications.length > 0) {
-            notifications[0].remove();
-            this.mobileNotificationCount--;
-          }
-        }
+                showNotification: function (type, message) {
+                    if (this.isMobile() && this.mobileNotificationCount >= this.maxMobileNotifications) {
+                        const notifications = document.querySelectorAll('.bootstrap-notify-container');
+                        if (notifications.length > 0) {
+                            notifications[0].remove();
+                            this.mobileNotificationCount--;
+                        }
+                    }
 
-        if (this.isMobile()) {
-          this.mobileNotificationCount++;
-        }
+                    if (this.isMobile()) {
+                        this.mobileNotificationCount++;
+                    }
 
-        $.notify({
-          message: message,
-          icon: type === 'success' ? 'bi bi-check-circle' : 'bi bi-exclamation-circle'
-        }, {
-          type: type,
-          allow_dismiss: true,
-          newest_on_top: true,
-          timer: 3000,
-          placement: {
-            from: 'top',
-            align: this.isMobile() ? 'center' : 'right'
-          },
-          animate: {
-            enter: 'animated bounceInDown',
-            exit: 'animated bounceOutUp'
-          },
-          template:
-            '<div data-notify="container" class="bootstrap-notify-container alert alert-{0}" role="alert">' +
-            '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
-            '<div class="notification-content">' +
-            '<span data-notify="icon"></span>' +
-            '<span data-notify="message">{2}</span>' +
-            '</div>' +
-            '</div>',
-          onClose: () => {
-            if (this.isMobile()) {
-              this.mobileNotificationCount--;
+                    $.notify({
+                        message: message,
+                        icon: type === 'success' ? 'bi bi-check-circle' : 'bi bi-exclamation-circle'
+                    }, {
+                        type: type,
+                        allow_dismiss: true,
+                        newest_on_top: true,
+                        timer: 3000,
+                        placement: {
+                            from: 'top',
+                            align: this.isMobile() ? 'center' : 'right'
+                        },
+                        animate: {
+                            enter: 'animated bounceInDown',
+                            exit: 'animated bounceOutUp'
+                        },
+                        template:
+                            '<div data-notify="container" class="bootstrap-notify-container alert alert-{0}" role="alert">' +
+                            '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+                            '<div class="notification-content">' +
+                            '<span data-notify="icon"></span>' +
+                            '<span data-notify="message">{2}</span>' +
+                            '</div>' +
+                            '</div>',
+                        onClose: () => {
+                            if (this.isMobile()) {
+                                this.mobileNotificationCount--;
+                            }
+                        }
+                    });
+                }
+            };
+
+            const defaultColors = {
+                'blue': '#0d6efd',
+                'green': '#198754',
+                'yellow': '#ffc107',
+                'red': '#dc3545'
+            };
+
+            const tasks = [];
+
+            let currentDate = moment();
+            let isMobileView = false;
+            let selectedDate = null;
+
+            function getTextColor(hexColor) {
+                const r = parseInt(hexColor.slice(1, 3), 16);
+                const g = parseInt(hexColor.slice(3, 5), 16);
+                const b = parseInt(hexColor.slice(5, 7), 16);
+                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                return luminance > 0.5 ? '#000000' : '#ffffff';
             }
-          }
-        });
-      }
-    };
 
-    const defaultColors = {
-      'blue': '#0d6efd',
-      'green': '#198754',
-      'yellow': '#ffc107',
-      'red': '#dc3545'
-    };
+            function handleResponsive() {
+                isMobileView = window.innerWidth <= 480;
 
-    const tasks = [];
+                if (isMobileView) {
+                    $('.day-name-full').addClass('d-none');
+                    $('.day-name-short').removeClass('d-none');
+                    $('.calendar-body').addClass('mobile-hide-events');
+                    renderMobileTaskList();
+                } else {
+                    $('.day-name-full').removeClass('d-none');
+                    $('.day-name-short').addClass('d-none');
+                    $('.calendar-body').removeClass('mobile-hide-events');
+                }
 
-    let currentDate = moment();
-    let isMobileView = false;
-    let selectedDate = null;
+                renderCalendar();
+            }
 
-    function getTextColor(hexColor) {
-      const r = parseInt(hexColor.slice(1, 3), 16);
-      const g = parseInt(hexColor.slice(3, 5), 16);
-      const b = parseInt(hexColor.slice(5, 7), 16);
-      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-      return luminance > 0.5 ? '#000000' : '#ffffff';
-    }
+            $(window).resize(handleResponsive);
 
-    function handleResponsive() {
-      isMobileView = window.innerWidth <= 480;
+            function renderCalendar() {
+                const firstDay = moment(currentDate).startOf('month').startOf('week');
+                const lastDay = moment(currentDate).endOf('month').endOf('week');
 
-      if (isMobileView) {
-        $('.day-name-full').addClass('d-none');
-        $('.day-name-short').removeClass('d-none');
-        $('.calendar-body').addClass('mobile-hide-events');
-        renderMobileTaskList();
-      } else {
-        $('.day-name-full').removeClass('d-none');
-        $('.day-name-short').addClass('d-none');
-        $('.calendar-body').removeClass('mobile-hide-events');
-      }
+                $('#month-year').text(currentDate.format('MMMM YYYY'));
+                $('#nav-month-year').text(currentDate.format('MMMM YYYY'));
 
-      renderCalendar();
-    }
+                $('#calendar-body').empty();
 
-    $(window).resize(handleResponsive);
+                let date = moment(firstDay);
+                while (date.isBefore(lastDay)) {
+                    let row = $('<tr></tr>');
 
-    function renderCalendar() {
-      const firstDay = moment(currentDate).startOf('month').startOf('week');
-      const lastDay = moment(currentDate).endOf('month').endOf('week');
+                    for (let i = 0; i < 7; i++) {
+                        const cellDate = moment(date);
+                        const isToday = cellDate.isSame(moment(), 'day');
+                        const isOtherMonth = !cellDate.isSame(currentDate, 'month');
+                        const isSelected = selectedDate && cellDate.isSame(selectedDate, 'day');
 
-      $('#month-year').text(currentDate.format('MMMM YYYY'));
-      $('#nav-month-year').text(currentDate.format('MMMM YYYY'));
+                        let cell = $('<td></td>');
+                        if (isOtherMonth) cell.addClass('other-month');
+                        if (isToday) cell.addClass('today');
+                        if (isSelected) cell.addClass('selected');
 
-      $('#calendar-body').empty();
+                        let dateCell = $('<div class="date-cell"></div>');
+                        let dateNumber = $('<div class="date-number"></div>').text(cellDate.date());
+                        dateCell.append(dateNumber);
 
-      let date = moment(firstDay);
-      while (date.isBefore(lastDay)) {
-        let row = $('<tr></tr>');
+                        if (!isMobileView) {
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
+                                    let eventDiv = $('<div></div>')
+                                        .addClass('event')
+                                        .css({
+                                            'background-color': task.colorHex || defaultColors[task.color] || '#0d6efd',
+                                            'color': getTextColor(task.colorHex || defaultColors[task.color] || '#0d6efd')
+                                        })
+                                        .text(task.title)
+                                        .attr('data-task-id', task.id);
+                                    dateCell.append(eventDiv);
+                                }
+                            });
+                        } else {
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
+                                    dateCell.css('border-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
+                                }
+                            });
+                        }
 
-        for (let i = 0; i < 7; i++) {
-          const cellDate = moment(date);
-          const isToday = cellDate.isSame(moment(), 'day');
-          const isOtherMonth = !cellDate.isSame(currentDate, 'month');
-          const isSelected = selectedDate && cellDate.isSame(selectedDate, 'day');
+                        cell.append(dateCell);
+                        row.append(cell);
 
-          let cell = $('<td></td>');
-          if (isOtherMonth) cell.addClass('other-month');
-          if (isToday) cell.addClass('today');
-          if (isSelected) cell.addClass('selected');
+                        date.add(1, 'day');
+                    }
 
-          let dateCell = $('<div class="date-cell"></div>');
-          let dateNumber = $('<div class="date-number"></div>').text(cellDate.date());
-          dateCell.append(dateNumber);
+                    $('#calendar-body').append(row);
+                }
 
-          if (!isMobileView) {
-            tasks.forEach(task => {
-              if (cellDate.format('YYYY-MM-DD') === task.date) {
-                let eventDiv = $('<div></div>')
-                  .addClass('event')
-                  .css({
-                    'background-color': task.colorHex || defaultColors[task.color] || '#0d6efd',
-                    'color': getTextColor(task.colorHex || defaultColors[task.color] || '#0d6efd')
-                  })
-                  .text(task.title)
-                  .attr('data-task-id', task.id);
-                dateCell.append(eventDiv);
-              }
-            });
-          } else {
-            tasks.forEach(task => {
-              if (cellDate.format('YYYY-MM-DD') === task.date) {
-                dateCell.css('border-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
-              }
-            });
-          }
+                $('.calendar-table td').click(function () {
+                    $('.calendar-table td').removeClass('selected');
+                    $(this).addClass('selected');
 
-          cell.append(dateCell);
-          row.append(cell);
+                    const dayNumber = parseInt($(this).find('.date-number').text());
 
-          date.add(1, 'day');
-        }
+                    selectedDate = moment(currentDate).date(dayNumber);
 
-        $('#calendar-body').append(row);
-      }
+                    if ($(this).hasClass('other-month')) {
+                        if (dayNumber > 20) {
+                            selectedDate = moment(currentDate).subtract(1, 'month').date(dayNumber);
+                        } else {
+                            selectedDate = moment(currentDate).add(1, 'month').date(dayNumber);
+                        }
+                    }
 
-      $('.calendar-table td').click(function () {
-        $('.calendar-table td').removeClass('selected');
-        $(this).addClass('selected');
+                    if (isMobileView) {
+                        renderMobileTaskList();
+                    }
+                });
 
-        const dayNumber = parseInt($(this).find('.date-number').text());
+                $('.event').on('click', function (e) {
+                    e.stopPropagation();
+                    NotificationManager.showNotification('info', 'Task: ' + $(this).text());
+                });
 
-        selectedDate = moment(currentDate).date(dayNumber);
+                // Context menu functionality
+                let currentTaskId = null;
 
-        if ($(this).hasClass('other-month')) {
-          if (dayNumber > 20) {
-            selectedDate = moment(currentDate).subtract(1, 'month').date(dayNumber);
-          } else {
-            selectedDate = moment(currentDate).add(1, 'month').date(dayNumber);
-          }
-        }
+                $('.event').on('contextmenu', function (e) {
+                    e.preventDefault();
+                    currentTaskId = $(this).data('task-id');
+                    console.log('Current Task ID:', currentTaskId); // Debugging line
+                    $('#context-menu').css({
+                        display: 'block',
+                        left: e.pageX,
+                        top: e.pageY
+                    });
+                });
 
-        if (isMobileView) {
-          renderMobileTaskList();
-        }
-      });
+                $(document).click(function () {
+                    $('#context-menu').hide();
+                });
 
-      $('.event').on('click', function (e) {
-        e.stopPropagation();
-        NotificationManager.showNotification('info', 'Task: ' + $(this).text());
-      });
+                $('#edit-task').click(function () {
+                    $('#context-menu').hide();
+                    const task = tasks.find(t => t.id === currentTaskId);
+                    console.log('Task Data:', task); // Debugging line
+                    if (task) {
+                        showEditModal(task);
+                    } else {
+                        NotificationManager.showNotification('error', 'Task not found!');
+                    }
+                });
 
-      // Context menu functionality
-      let currentTaskId = null;
+                $('#delete-task').click(function () {
+                    $('#context-menu').hide();
+                    // Implement delete functionality here
+                    alert('Delete task: ' + currentTaskId);
+                });
+            }
 
-      $('.event').on('contextmenu', function (e) {
-        e.preventDefault();
-        currentTaskId = $(this).data('task-id');
-        $('#context-menu').css({
-          display: 'block',
-          left: e.pageX,
-          top: e.pageY
-        });
-      });
+            function renderMobileTaskList() {
+                const tasksContainer = $('#mobile-tasks-container');
+                tasksContainer.empty();
 
-      $(document).click(function () {
-        $('#context-menu').hide();
-      });
+                $('#mobile-task-list h3').text('Tasks for ' + currentDate.format('MMMM YYYY'));
 
-      $('#edit-task').click(function () {
-        $('#context-menu').hide();
-        const task = tasks.find(t => t.id === currentTaskId);
-        if (task) {
-          showEditModal(task);
-        } else {
-          NotificationManager.showNotification('error', 'Task not found!');
-        }
-      });
+                const monthTasks = tasks.filter(task =>
+                    moment(task.date).isSame(currentDate, 'month')
+                );
 
-      $('#delete-task').click(function () {
-        $('#context-menu').hide();
-        // Implement delete functionality here
-        alert('Delete task: ' + currentTaskId);
-      });
-    }
+                if (monthTasks.length === 0) {
+                    tasksContainer.append('<p class="text-center text-muted my-4">No tasks scheduled this month</p>');
+                    return;
+                }
 
-    function renderMobileTaskList() {
-      const tasksContainer = $('#mobile-tasks-container');
-      tasksContainer.empty();
+                monthTasks.sort((a, b) => moment(a.date).diff(moment(b.date)));
 
-      $('#mobile-task-list h3').text('Tasks for ' + currentDate.format('MMMM YYYY'));
+                const groupedTasks = {};
+                monthTasks.forEach(task => {
+                    const dateKey = task.date;
+                    if (!groupedTasks[dateKey]) {
+                        groupedTasks[dateKey] = [];
+                    }
+                    groupedTasks[dateKey].push(task);
+                });
 
-      const monthTasks = tasks.filter(task =>
-        moment(task.date).isSame(currentDate, 'month')
-      );
+                Object.keys(groupedTasks).forEach(dateKey => {
+                    const formattedDate = moment(dateKey).format('ddd, MMM D');
 
-      if (monthTasks.length === 0) {
-        tasksContainer.append('<p class="text-center text-muted my-4">No tasks scheduled this month</p>');
-        return;
-      }
+                    if (!selectedDate || moment(dateKey).isSame(selectedDate, 'day')) {
+                        groupedTasks[dateKey].forEach(task => {
+                            const taskItem = $('<div class="task-item"></div>')
+                                .css('border-left-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
 
-      monthTasks.sort((a, b) => moment(a.date).diff(moment(b.date)));
-
-      const groupedTasks = {};
-      monthTasks.forEach(task => {
-        const dateKey = task.date;
-        if (!groupedTasks[dateKey]) {
-          groupedTasks[dateKey] = [];
-        }
-        groupedTasks[dateKey].push(task);
-      });
-
-      Object.keys(groupedTasks).forEach(dateKey => {
-        const formattedDate = moment(dateKey).format('ddd, MMM D');
-
-        if (!selectedDate || moment(dateKey).isSame(selectedDate, 'day')) {
-          groupedTasks[dateKey].forEach(task => {
-            const taskItem = $('<div class="task-item"></div>')
-              .css('border-left-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
-
-            const taskContent = $(`
+                            const taskContent = $(`
               <div>
                 <h5 class="task-title">${task.title}</h5>
                 <div class="task-date">${formattedDate}</div>
               </div>
             `);
 
-            taskItem.append(taskContent);
-            tasksContainer.append(taskItem);
-          });
-        }
-      });
+                            taskItem.append(taskContent);
+                            tasksContainer.append(taskItem);
+                        });
+                    }
+                });
 
-      if (!selectedDate || !groupedTasks[selectedDate.format('YYYY-MM-DD')]) {
-        tasksContainer.append('<p class="text-center text-muted my-4">No Recent Activity</p>');
-      }
+                if (!selectedDate || !groupedTasks[selectedDate.format('YYYY-MM-DD')]) {
+                    tasksContainer.append('<p class="text-center text-muted my-4">No Recent Activity</p>');
+                }
 
-      $('.task-item').on('click', function () {
-        NotificationManager.showNotification('info', 'Task: ' + $(this).find('.task-title').text());
-      });
+                $('.task-item').on('click', function () {
+                    NotificationManager.showNotification('info', 'Task: ' + $(this).find('.task-title').text());
+                });
 
-      // Long press detection
-      let longPressTimer;
-      const longPressDuration = 500; // Duration in milliseconds
+                // Long press detection
+                let longPressTimer;
+                const longPressDuration = 500; // Duration in milliseconds
 
-      $('.task-item').on('mousedown touchstart', function (e) {
-        const taskItem = $(this);
-        longPressTimer = setTimeout(function () {
-          showContextMenu(e, taskItem);
-        }, longPressDuration);
-      }).on('mouseup mouseleave touchend touchcancel', function () {
-        clearTimeout(longPressTimer);
-      });
+                $('.task-item').on('mousedown touchstart', function (e) {
+                    const taskItem = $(this);
+                    longPressTimer = setTimeout(function () {
+                        showContextMenu(e, taskItem);
+                    }, longPressDuration);
+                }).on('mouseup mouseleave touchend touchcancel', function () {
+                    clearTimeout(longPressTimer);
+                });
 
-      function showContextMenu(e, taskItem) {
-        e.preventDefault();
-        const taskId = taskItem.data('task-id');
-        $('#context-menu').css({
-          display: 'block',
-          left: e.pageX || e.originalEvent.touches[0].pageX,
-          top: e.pageY || e.originalEvent.touches[0].pageY
-        }).data('task-id', taskId);
-      }
-    }
+                function showContextMenu(e, taskItem) {
+                    e.preventDefault();
+                    const taskId = taskItem.data('task-id');
+                    $('#context-menu').css({
+                        display: 'block',
+                        left: e.pageX || e.originalEvent.touches[0].pageX,
+                        top: e.pageY || e.originalEvent.touches[0].pageY
+                    }).data('task-id', taskId);
+                }
+            }
 
-    function fetchActivities() {
-      $.ajax({
-        url: '/fetch-activities',
-        method: 'GET',
-        success: function (response) {
-          if (response.success) {
-            const activities = response.activities;
-            updateCalendarWithActivities(activities);
-          } else {
-            NotificationManager.showNotification('error', 'Failed to fetch activities: ' + response.message);
-          }
-        },
-        error: function (jqXHR) {
-          NotificationManager.showNotification('error', 'Error fetching activities: ' + jqXHR.responseText);
-        }
-      });
-    }
+            function fetchActivities() {
+                $.ajax({
+                    url: '/fetch-activities',
+                    method: 'GET',
+                    success: function (response) {
+                        if (response.success) {
+                            const activities = response.activities;
+                            updateCalendarWithActivities(activities);
+                        } else {
+                            NotificationManager.showNotification('error', 'Failed to fetch activities: ' + response.message);
+                        }
+                    },
+                    error: function (jqXHR) {
+                        NotificationManager.showNotification('error', 'Error fetching activities: ' + jqXHR.responseText);
+                    }
+                });
+            }
 
-    function updateCalendarWithActivities(activities) {
-      activities.forEach(activity => {
-        const activityDate = moment(activity.activity).format('YYYY-MM-DD');
-        const task = {
-          id: activity.id,
-          date: activityDate,
-          title: activity.title,
-          colorHex: activity.color_hex
-        };
-        tasks.push(task);
-      });
-      renderCalendar();
-      if (isMobileView) {
-        renderMobileTaskList();
-      }
-    }
+            function updateCalendarWithActivities(activities) {
+                activities.forEach(activity => {
+                    const activityDate = moment(activity.activity).format('YYYY-MM-DD');
+                    const task = {
+                        id: activity.id,
+                        date: activityDate,
+                        title: activity.title,
+                        colorHex: activity.color_hex
+                    };
+                    tasks.push(task);
+                });
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            }
 
-    function showEditModal(task) {
-      const editModalHtml = `
+            function showEditModal(task) {
+                const editModalHtml = `
         <div class="modal fade" id="editTaskModal" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -856,54 +858,54 @@
         </div>
       `;
 
-      $('#editTaskModal').remove();
-      $('body').append(editModalHtml);
+                $('#editTaskModal').remove();
+                $('body').append(editModalHtml);
 
-      $('#editTaskColorPicker').spectrum({
-        color: task.colorHex,
-        showInput: true,
-        preferredFormat: "hex",
-        showPalette: true,
-        palette: [
-          ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
-          ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
-          ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
-        ],
-        change: function (color) {
-          $('#editColorPreview').css('background-color', color.toHexString());
-        }
-      });
+                $('#editTaskColorPicker').spectrum({
+                    color: task.colorHex,
+                    showInput: true,
+                    preferredFormat: "hex",
+                    showPalette: true,
+                    palette: [
+                        ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
+                        ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
+                        ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
+                    ],
+                    change: function (color) {
+                        $('#editColorPreview').css('background-color', color.toHexString());
+                    }
+                });
 
-      const editModal = new bootstrap.Modal(document.getElementById('editTaskModal'));
-      editModal.show();
+                const editModal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+                editModal.show();
 
-      $('#saveEditTaskBtn').click(function () {
-        const updatedTask = {
-          id: task.id,
-          title: $('#editTaskTitle').val(),
-          date: $('#editTaskDate').val(),
-          eventDateEnd: $('#editTaskDateEnd').val(),
-          colorHex: $('#editTaskColorPicker').spectrum('get').toHexString()
-        };
+                $('#saveEditTaskBtn').click(function () {
+                    const updatedTask = {
+                        id: task.id,
+                        title: $('#editTaskTitle').val(),
+                        date: $('#editTaskDate').val(),
+                        eventDateEnd: $('#editTaskDateEnd').val(),
+                        colorHex: $('#editTaskColorPicker').spectrum('get').toHexString()
+                    };
 
-        // Update the task in the tasks array
-        const taskIndex = tasks.findIndex(t => t.id === updatedTask.id);
-        if (taskIndex !== -1) {
-          tasks[taskIndex] = updatedTask;
-          renderCalendar();
-          if (isMobileView) {
-            renderMobileTaskList();
-          }
-          editModal.hide();
-          NotificationManager.showNotification('success', 'Task updated successfully!');
-        } else {
-          NotificationManager.showNotification('error', 'Task not found!');
-        }
-      });
-    }
+                    // Update the task in the tasks array
+                    const taskIndex = tasks.findIndex(t => t.id === updatedTask.id);
+                    if (taskIndex !== -1) {
+                        tasks[taskIndex] = updatedTask;
+                        renderCalendar();
+                        if (isMobileView) {
+                            renderMobileTaskList();
+                        }
+                        editModal.hide();
+                        NotificationManager.showNotification('success', 'Task updated successfully!');
+                    } else {
+                        NotificationManager.showNotification('error', 'Task not found!');
+                    }
+                });
+            }
 
-    function showPasswordModal(callback) {
-      const passwordModalHtml = `
+            function showPasswordModal(callback) {
+                const passwordModalHtml = `
         <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -928,75 +930,75 @@
         </div>
       `;
 
-      $('#passwordModal').remove();
-      $('body').append(passwordModalHtml);
+                $('#passwordModal').remove();
+                $('body').append(passwordModalHtml);
 
-      const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
-      passwordModal.show();
+                const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+                passwordModal.show();
 
-      // Hide the event form when the password modal is shown
-      $('#addEventModal').modal('hide');
+                // Hide the event form when the password modal is shown
+                $('#addEventModal').modal('hide');
 
-      $('#submitPasswordBtn').click(function () {
-        const code = $('#passwordInput').val();
-        $.ajax({
-          url: '/check-code',
-          method: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify({ code: code }),
-          success: function (response) {
-            if (response.success) {
-              passwordModal.hide();
-              callback(true);
-            } else {
-              NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
-              callback(false);
+                $('#submitPasswordBtn').click(function () {
+                    const code = $('#passwordInput').val();
+                    $.ajax({
+                        url: '/check-code',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ code: code }),
+                        success: function (response) {
+                            if (response.success) {
+                                passwordModal.hide();
+                                callback(true);
+                            } else {
+                                NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
+                                callback(false);
+                            }
+                        },
+                        error: function (jqXHR) {
+                            NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
+                            callback(false);
+                        }
+                    });
+                });
+
+                // Show the event form again if the password modal is canceled
+                $('#passwordModal').on('hidden.bs.modal', function () {
+                    $('#addEventModal').modal('show');
+                });
             }
-          },
-          error: function (jqXHR) {
-            NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
-            callback(false);
-          }
-        });
-      });
 
-      // Show the event form again if the password modal is canceled
-      $('#passwordModal').on('hidden.bs.modal', function () {
-        $('#addEventModal').modal('show');
-      });
-    }
+            handleResponsive();
+            fetchActivities();
 
-    handleResponsive();
-    fetchActivities();
+            $('#prev-month').click(function () {
+                currentDate.subtract(1, 'month');
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
 
-    $('#prev-month').click(function () {
-      currentDate.subtract(1, 'month');
-      renderCalendar();
-      if (isMobileView) {
-        renderMobileTaskList();
-      }
-    });
+            $('#next-month').click(function () {
+                currentDate.add(1, 'month');
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
 
-    $('#next-month').click(function () {
-      currentDate.add(1, 'month');
-      renderCalendar();
-      if (isMobileView) {
-        renderMobileTaskList();
-      }
-    });
+            $('#today-btn').click(function () {
+                currentDate = moment();
+                selectedDate = null;
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
 
-    $('#today-btn').click(function () {
-      currentDate = moment();
-      selectedDate = null;
-      renderCalendar();
-      if (isMobileView) {
-        renderMobileTaskList();
-      }
-    });
-
-    $('#add-event-btn').click(function () {
-      const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
-      const modalHtml = `
+            $('#add-event-btn').click(function () {
+                const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
+                const modalHtml = `
         <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -1043,89 +1045,89 @@
         </div>
       `;
 
-      $('#addEventModal').remove();
-      $('body').append(modalHtml);
+                $('#addEventModal').remove();
+                $('body').append(modalHtml);
 
-      $('#eventColorPicker').spectrum({
-        color: "#0d6efd",
-        showInput: true,
-        preferredFormat: "hex",
-        showPalette: true,
-        palette: [
-          ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
-          ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
-          ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
-        ],
-        change: function (color) {
-          $('#colorPreview').css('background-color', color.toHexString());
-        }
-      });
-
-      $('#colorPreview').css('background-color', '#0d6efd');
-
-      $('.color-preset').click(function () {
-        const color = $(this).data('color');
-        $('#eventColorPicker').spectrum('set', color);
-        $('#colorPreview').css('background-color', color);
-      });
-
-      const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
-      modal.show();
-
-      $('#saveEventBtn').click(function (event) {
-        event.preventDefault(); // Prevent default form submission
-
-        const title = $('#eventTitle').val();
-        const date = $('#eventDate').val();
-        const eventDateEnd = $('#eventDateEnd').val();
-        const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
-
-        if (title && date && eventDateEnd) {
-          showPasswordModal(function (isAuthenticated) {
-            if (isAuthenticated) {
-              $.ajax({
-                url: '/insert-activity',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                  title: title,
-                  activity_date: date,
-                  activity_end: eventDateEnd,
-                  color_hex: colorHex
-                }),
-                success: function (response) {
-                  if (response.success) {
-                    NotificationManager.showNotification('success', 'Activity added successfully!');
-                    tasks.push({
-                      id: tasks.length + 1,
-                      date: date,
-                      eventDateEnd: eventDateEnd,
-                      title: title,
-                      colorHex: colorHex
-                    });
-                    renderCalendar();
-                    if (isMobileView) {
-                      renderMobileTaskList();
+                $('#eventColorPicker').spectrum({
+                    color: "#0d6efd",
+                    showInput: true,
+                    preferredFormat: "hex",
+                    showPalette: true,
+                    palette: [
+                        ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
+                        ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
+                        ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
+                    ],
+                    change: function (color) {
+                        $('#colorPreview').css('background-color', color.toHexString());
                     }
-                    modal.hide(); // Hide the modal
-                    $('#eventForm')[0].reset(); // Reset the form
-                    $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
-                  } else {
-                    NotificationManager.showNotification('error', 'Error: ' + response.message);
-                  }
-                },
-                error: function (jqXHR) {
-                  NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
-                }
-              });
-            }
-          });
-        } else {
-          NotificationManager.showNotification('warning', 'Please fill in all required fields');
-        }
-      });
-    });
-  });
+                });
+
+                $('#colorPreview').css('background-color', '#0d6efd');
+
+                $('.color-preset').click(function () {
+                    const color = $(this).data('color');
+                    $('#eventColorPicker').spectrum('set', color);
+                    $('#colorPreview').css('background-color', color);
+                });
+
+                const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
+                modal.show();
+
+                $('#saveEventBtn').click(function (event) {
+                    event.preventDefault(); // Prevent default form submission
+
+                    const title = $('#eventTitle').val();
+                    const date = $('#eventDate').val();
+                    const eventDateEnd = $('#eventDateEnd').val();
+                    const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
+
+                    if (title && date && eventDateEnd) {
+                        showPasswordModal(function (isAuthenticated) {
+                            if (isAuthenticated) {
+                                $.ajax({
+                                    url: '/insert-activity',
+                                    method: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify({
+                                        title: title,
+                                        activity_date: date,
+                                        activity_end: eventDateEnd,
+                                        color_hex: colorHex
+                                    }),
+                                    success: function (response) {
+                                        if (response.success) {
+                                            NotificationManager.showNotification('success', 'Activity added successfully!');
+                                            tasks.push({
+                                                id: tasks.length + 1,
+                                                date: date,
+                                                eventDateEnd: eventDateEnd,
+                                                title: title,
+                                                colorHex: colorHex
+                                            });
+                                            renderCalendar();
+                                            if (isMobileView) {
+                                                renderMobileTaskList();
+                                            }
+                                            modal.hide(); // Hide the modal
+                                            $('#eventForm')[0].reset(); // Reset the form
+                                            $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
+                                        } else {
+                                            NotificationManager.showNotification('error', 'Error: ' + response.message);
+                                        }
+                                    },
+                                    error: function (jqXHR) {
+                                        NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        NotificationManager.showNotification('warning', 'Please fill in all required fields');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 
