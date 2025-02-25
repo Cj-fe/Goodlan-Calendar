@@ -745,12 +745,12 @@
                                 passwordModal.hide();
                                 callback(true);
                             } else {
-                                NotificationManager.showNotification('error', 'Incorrect code');
+                                NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
                                 callback(false);
                             }
                         },
                         error: function (jqXHR) {
-                            NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
+                            NotificationManager.showNotification('danger', 'Error: ' + jqXHR.responseText);
                             callback(false);
                         }
                     });
