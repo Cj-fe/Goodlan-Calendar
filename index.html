@@ -940,6 +940,100 @@
                 }
             });
 
+
+            function showPasswordModal(callback) {
+                const passwordModalHtml = `
+      <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Enter Code</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="passwordForm">
+                <div class="mb-3">
+                  <label for="passwordInput" class="form-label">Code</label>
+                  <input type="password" class="form-control" id="passwordInput" required>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="submitPasswordBtn">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+                $('#passwordModal').remove();
+                $('body').append(passwordModalHtml);
+
+                const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+                passwordModal.show();
+
+                // Hide the event form when the password modal is shown
+                $('#addEventModal').modal('hide');
+
+                $('#submitPasswordBtn').click(function () {
+                    const code = $('#passwordInput').val();
+                    $.ajax({
+                        url: '/check-code',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ code: code }),
+                        success: function (response) {
+                            if (response.success) {
+                                passwordModal.hide();
+                                callback(true);
+                            } else {
+                                NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
+                                callback(false);
+                            }
+                        },
+                        error: function (jqXHR) {
+                            NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
+                            callback(false);
+                        }
+                    });
+                });
+
+                // Show the event form again if the password modal is canceled
+                $('#passwordModal').on('hidden.bs.modal', function () {
+                    $('#addEventModal').modal('show');
+                });
+            }
+
+            handleResponsive();
+            fetchActivities();
+
+            $('#prev-month').click(function () {
+                currentDate.subtract(1, 'month');
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
+
+            $('#next-month').click(function () {
+                currentDate.add(1, 'month');
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
+
+            $('#today-btn').click(function () {
+                currentDate = moment();
+                selectedDate = null;
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            });
+
+            
             $('#add-event-btn').click(function () {
                 const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
                 const modalHtml = `
