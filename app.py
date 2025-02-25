@@ -34,17 +34,17 @@ def insert_activity():
         data = request.json
         title = data.get('title')
         activity_date = data.get('activity_date')
+        activity_end = data.get('activity_end')  # Added activity_end
         color_hex = data.get('color_hex')
-        eventDateEnd = data.get('eventDateEnd')
 
-        if not title or not activity_date or not color_hex:
+        if not title or not activity_date or not activity_end or not color_hex:
             return jsonify({
                 "success": False,
-                "message": "Title, activity date, and color hex are required"
+                "message": "Title, activity date, activity end date, and color hex are required"
             }), 400
 
         activity_service = ActivityService()
-        result = activity_service.insert_activity(title, activity_date, color_hex, eventDateEnd)
+        result = activity_service.insert_activity(title, activity_date, activity_end, color_hex)
 
         if result["success"]:
             return jsonify({
@@ -62,6 +62,7 @@ def insert_activity():
             "success": False,
             "message": str(e)
         }), 500
+
 
 @app.route('/fetch-activities', methods=['GET'])
 def fetch_activities():

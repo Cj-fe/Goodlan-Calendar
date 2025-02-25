@@ -7,13 +7,14 @@ class ActivityService:
         """Initialize the ActivityService with database configuration."""
         self.db = DatabaseConfig()
 
-    def insert_activity(self, title, activity_date, color_hex, eventDateEnd):
+    def insert_activity(self, title, activity_date, activity_end, color_hex):
         """
         Insert a new activity record into the activity table.
 
         Parameters:
         title (str): The title of the activity.
-        activity_date (str): The date of the activity in 'YYYY-MM-DD' format.
+        activity_date (str): The start date of the activity in 'YYYY-MM-DD' format.
+        activity_end (str): The end date of the activity in 'YYYY-MM-DD' format.
         color_hex (str): The color code in hex format.
 
         Returns:
@@ -30,12 +31,12 @@ class ActivityService:
 
             # Insert the activity record
             insert_query = """
-            INSERT INTO activity (id, title, activity, color_hex, created_at, eventDateEnd)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO activity (id, title, activity, activity_end, color_hex, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """
             activity_id = str(uuid.uuid4())
             created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            cursor.execute(insert_query, (activity_id, title, activity_date, color_hex, created_at, eventDateEnd))
+            cursor.execute(insert_query, (activity_id, title, activity_date, activity_end, color_hex, created_at))
             self.db.connection.commit()
 
             return {
@@ -52,6 +53,7 @@ class ActivityService:
         finally:
             cursor.close()
             self.db.disconnect()
+
 
     def fetch_activities(self):
         """

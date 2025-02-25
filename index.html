@@ -663,9 +663,10 @@
                 $('#saveEventBtn').click(function () {
                     const title = $('#eventTitle').val();
                     const date = $('#eventDate').val();
+                    const eventDateEnd = $('#eventDateEnd').val(); // Added eventDateEnd
                     const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
 
-                    if (title && date) {
+                    if (title && date && eventDateEnd) { // Updated validation check
                         $.ajax({
                             url: '/insert-activity',
                             method: 'POST',
@@ -673,6 +674,7 @@
                             data: JSON.stringify({
                                 title: title,
                                 activity_date: date,
+                                activity_end: eventDateEnd, // Added to request
                                 color_hex: colorHex
                             }),
                             success: function (response) {
@@ -681,6 +683,7 @@
                                     tasks.push({
                                         id: tasks.length + 1,
                                         date: date,
+                                        eventDateEnd: eventDateEnd, // Include in tasks
                                         title: title,
                                         colorHex: colorHex
                                     });
@@ -701,6 +704,7 @@
                         alert('Please fill in all required fields');
                     }
                 });
+
             });
 
             $('.dropdown-item').click(function () {
