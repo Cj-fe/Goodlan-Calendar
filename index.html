@@ -692,7 +692,7 @@
 
                 $('.event').on('contextmenu', function (e) {
                     e.preventDefault();
-                    currentTaskId = $(this).data('task-id');
+                    currentTaskId = $(this).data('task-id'); // Assign the task ID here
                     $('#context-menu').css({
                         display: 'block',
                         left: e.pageX,
@@ -983,8 +983,8 @@
             });
 
             $('#add-event-btn').click(function () {
-        const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
-        const modalHtml = `
+                const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
+                const modalHtml = `
             <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -1031,89 +1031,89 @@
             </div>
         `;
 
-        $('#addEventModal').remove();
-        $('body').append(modalHtml);
+                $('#addEventModal').remove();
+                $('body').append(modalHtml);
 
-        $('#eventColorPicker').spectrum({
-            color: "#0d6efd",
-            showInput: true,
-            preferredFormat: "hex",
-            showPalette: true,
-            palette: [
-                ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
-                ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
-                ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
-            ],
-            change: function (color) {
-                $('#colorPreview').css('background-color', color.toHexString());
-            }
-        });
-
-        $('#colorPreview').css('background-color', '#0d6efd');
-
-        $('.color-preset').click(function () {
-            const color = $(this).data('color');
-            $('#eventColorPicker').spectrum('set', color);
-            $('#colorPreview').css('background-color', color);
-        });
-
-        const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
-        modal.show();
-
-        $('#saveEventBtn').click(function (event) {
-            event.preventDefault(); // Prevent default form submission
-
-            const title = $('#eventTitle').val();
-            const date = $('#eventDate').val();
-            const eventDateEnd = $('#eventDateEnd').val();
-            const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
-
-            if (title && date && eventDateEnd) {
-                showPasswordModal(function (isAuthenticated) {
-                    if (isAuthenticated) {
-                        $.ajax({
-                            url: '/insert-activity',
-                            method: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                title: title,
-                                activity_date: date,
-                                activity_end: eventDateEnd,
-                                color_hex: colorHex
-                            }),
-                            success: function (response) {
-                                if (response.success) {
-                                    NotificationManager.showNotification('success', 'Activity added successfully!');
-                                    tasks.push({
-                                        id: tasks.length + 1,
-                                        date: date,
-                                        eventDateEnd: eventDateEnd,
-                                        title: title,
-                                        colorHex: colorHex
-                                    });
-                                    renderCalendar();
-                                    if (isMobileView) {
-                                        renderMobileTaskList();
-                                    }
-                                    modal.hide(); // Hide the modal
-                                    $('#eventForm')[0].reset(); // Reset the form
-                                    $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
-                                } else {
-                                    NotificationManager.showNotification('error', 'Error: ' + response.message);
-                                }
-                            },
-                            error: function (jqXHR) {
-                                NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
-                            }
-                        });
+                $('#eventColorPicker').spectrum({
+                    color: "#0d6efd",
+                    showInput: true,
+                    preferredFormat: "hex",
+                    showPalette: true,
+                    palette: [
+                        ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
+                        ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
+                        ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
+                    ],
+                    change: function (color) {
+                        $('#colorPreview').css('background-color', color.toHexString());
                     }
                 });
-            } else {
-                NotificationManager.showNotification('warning', 'Please fill in all required fields');
-            }
+
+                $('#colorPreview').css('background-color', '#0d6efd');
+
+                $('.color-preset').click(function () {
+                    const color = $(this).data('color');
+                    $('#eventColorPicker').spectrum('set', color);
+                    $('#colorPreview').css('background-color', color);
+                });
+
+                const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
+                modal.show();
+
+                $('#saveEventBtn').click(function (event) {
+                    event.preventDefault(); // Prevent default form submission
+
+                    const title = $('#eventTitle').val();
+                    const date = $('#eventDate').val();
+                    const eventDateEnd = $('#eventDateEnd').val();
+                    const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
+
+                    if (title && date && eventDateEnd) {
+                        showPasswordModal(function (isAuthenticated) {
+                            if (isAuthenticated) {
+                                $.ajax({
+                                    url: '/insert-activity',
+                                    method: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify({
+                                        title: title,
+                                        activity_date: date,
+                                        activity_end: eventDateEnd,
+                                        color_hex: colorHex
+                                    }),
+                                    success: function (response) {
+                                        if (response.success) {
+                                            NotificationManager.showNotification('success', 'Activity added successfully!');
+                                            tasks.push({
+                                                id: tasks.length + 1,
+                                                date: date,
+                                                eventDateEnd: eventDateEnd,
+                                                title: title,
+                                                colorHex: colorHex
+                                            });
+                                            renderCalendar();
+                                            if (isMobileView) {
+                                                renderMobileTaskList();
+                                            }
+                                            modal.hide(); // Hide the modal
+                                            $('#eventForm')[0].reset(); // Reset the form
+                                            $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
+                                        } else {
+                                            NotificationManager.showNotification('error', 'Error: ' + response.message);
+                                        }
+                                    },
+                                    error: function (jqXHR) {
+                                        NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        NotificationManager.showNotification('warning', 'Please fill in all required fields');
+                    }
+                });
+            });
         });
-    });
-    });
     </script>
 </body>
 
