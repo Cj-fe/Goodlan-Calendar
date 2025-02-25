@@ -689,8 +689,12 @@
 
                 $('#edit-task').click(function () {
                     $('#context-menu').hide();
+                    console.log('Current Task ID:', currentTaskId); // Debugging line
+                    console.log('Tasks Array:', tasks); // Debugging line
+
                     const task = tasks.find(t => t.id === currentTaskId);
                     console.log('Task Data:', task); // Debugging line
+
                     if (task) {
                         showEditModal(task);
                     } else {
