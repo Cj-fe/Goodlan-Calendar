@@ -448,7 +448,7 @@
     </div>
 
 
-
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
@@ -517,10 +517,10 @@
             };
 
             const tasks = [];
+
             let currentDate = moment();
             let isMobileView = false;
             let selectedDate = null;
-            let currentTaskId = null;
 
             function getTextColor(hexColor) {
                 const r = parseInt(hexColor.slice(1, 3), 16);
@@ -554,6 +554,7 @@
                 const lastDay = moment(currentDate).endOf('month').endOf('week');
 
                 $('#month-year').text(currentDate.format('MMMM YYYY'));
+                $('#nav-month-year').text(currentDate.format('MMMM YYYY'));
 
                 $('#calendar-body').empty();
 
@@ -634,6 +635,8 @@
                 });
 
                 // Context menu functionality
+                let currentTaskId = null;
+
                 $('.event').on('contextmenu', function (e) {
                     e.preventDefault();
                     currentTaskId = $(this).data('task-id');
@@ -650,9 +653,8 @@
 
                 $('#edit-task').click(function () {
                     $('#context-menu').hide();
-                    if (currentTaskId) {
-                        fetchActivityById(currentTaskId);
-                    }
+                    // Implement edit functionality here
+                    alert('Edit task: ' + currentTaskId);
                 });
 
                 $('#delete-task').click(function () {
@@ -776,33 +778,68 @@
                 }
             }
 
-            function fetchActivityById(activityId) {
-                $.ajax({
-                    url: `/fetch-activity/${activityId}`,
-                    method: 'GET',
-                    success: function (response) {
-                        if (response.success) {
-                            const activity = response.activity;
-                            populateEditModal(activity);
-                        } else {
-                            NotificationManager.showNotification('error', 'Failed to fetch activity: ' + response.message);
+            function showPasswordModal(callback) {
+                const passwordModalHtml = `
+      <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Enter Code</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="passwordForm">
+                <div class="mb-3">
+                  <label for="passwordInput" class="form-label">Code</label>
+                  <input type="password" class="form-control" id="passwordInput" required>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="submitPasswordBtn">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+                $('#passwordModal').remove();
+                $('body').append(passwordModalHtml);
+
+                const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+                passwordModal.show();
+
+                // Hide the event form when the password modal is shown
+                $('#addEventModal').modal('hide');
+
+                $('#submitPasswordBtn').click(function () {
+                    const code = $('#passwordInput').val();
+                    $.ajax({
+                        url: '/check-code',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ code: code }),
+                        success: function (response) {
+                            if (response.success) {
+                                passwordModal.hide();
+                                callback(true);
+                            } else {
+                                NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
+                                callback(false);
+                            }
+                        },
+                        error: function (jqXHR) {
+                            NotificationManager.showNotification('danger', 'Invalid Code Please Try Again');
+                            callback(false);
                         }
-                    },
-                    error: function (jqXHR) {
-                        NotificationManager.showNotification('error', 'Error fetching activity: ' + jqXHR.responseText);
-                    }
+                    });
                 });
-            }
 
-            function populateEditModal(activity) {
-                $('#editEventModal #editEventTitle').val(activity.title);
-                $('#editEventModal #editEventDate').val(activity.activity);
-                $('#editEventModal #editEventDateEnd').val(activity.activity_end);
-                $('#editEventModal #editEventColorPicker').spectrum('set', activity.color_hex);
-                $('#editEventModal #editColorPreview').css('background-color', activity.color_hex);
-
-                const modal = new bootstrap.Modal(document.getElementById('editEventModal'));
-                modal.show();
+                // Show the event form again if the password modal is canceled
+                $('#passwordModal').on('hidden.bs.modal', function () {
+                    $('#addEventModal').modal('show');
+                });
             }
 
             handleResponsive();
@@ -834,137 +871,137 @@
             });
 
             $('#add-event-btn').click(function () {
-                const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
-                const modalHtml = `
-        <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Add New Activity</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <form id="eventForm">
-                  <div class="mb-3">
-                    <label for="eventTitle" class="form-label">Activity Title</label>
-                    <input type="text" class="form-control" id="eventTitle" required>
-                  </div>
-                  <div class="mb-3">
-                    <label for="eventDate" class="form-label">Date Start</label>
-                    <input type="date" class="form-control" id="eventDate" value="${dateString}" required>
-                  </div>
-                  <div class="mb-3">
-                    <label for="eventDateEnd" class="form-label">Date End</label>
-                    <input type="date" class="form-control" id="eventDateEnd" value="${dateString}" required>
-                  </div>
-                  <div class="mb-3">
-                    <label for="eventColor" class="form-label">Color</label>
-                    <div class="d-flex align-items-center">
-                      <input type="text" id="eventColorPicker" class="form-control">
-                      <div id="colorPreview" class="color-preview ms-2"></div>
+        const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
+        const modalHtml = `
+            <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Activity</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="eventForm">
+                                <div class="mb-3">
+                                    <label for="eventTitle" class="form-label">Activity Title</label>
+                                    <input type="text" class="form-control" id="eventTitle" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="eventDate" class="form-label">Date Start</label>
+                                    <input type="date" class="form-control" id="eventDate" value="${dateString}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="eventDateEnd" class="form-label">Date End</label>
+                                    <input type="date" class="form-control" id="eventDateEnd" value="${dateString}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="eventColor" class="form-label">Color</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="text" id="eventColorPicker" class="form-control">
+                                        <div id="colorPreview" class="color-preview ms-2"></div>
+                                    </div>
+                                    <div class="mt-2 text-muted small">Select a color or use one of the presets below</div>
+                                    <div class="d-flex mt-2 gap-2">
+                                        <button type="button" class="btn btn-sm btn-primary color-preset" data-color="#0d6efd">Blue</button>
+                                        <button type="button" class="btn btn-sm btn-success color-preset" data-color="#198754">Green</button>
+                                        <button type="button" class="btn btn-sm btn-warning color-preset" data-color="#ffc107">Yellow</button>
+                                        <button type="button" class="btn btn-sm btn-danger color-preset" data-color="#dc3545">Red</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="saveEventBtn">Save Activity</button>
+                        </div>
                     </div>
-                    <div class="mt-2 text-muted small">Select a color or use one of the presets below</div>
-                    <div class="d-flex mt-2 gap-2">
-                      <button type="button" class="btn btn-sm btn-primary color-preset" data-color="#0d6efd">Blue</button>
-                      <button type="button" class="btn btn-sm btn-success color-preset" data-color="#198754">Green</button>
-                      <button type="button" class="btn btn-sm btn-warning color-preset" data-color="#ffc107">Yellow</button>
-                      <button type="button" class="btn btn-sm btn-danger color-preset" data-color="#dc3545">Red</button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveEventBtn">Save Activity</button>
-              </div>
+                </div>
             </div>
-          </div>
-        </div>
-      `;
+        `;
 
-                $('#addEventModal').remove();
-                $('body').append(modalHtml);
+        $('#addEventModal').remove();
+        $('body').append(modalHtml);
 
-                $('#eventColorPicker').spectrum({
-                    color: "#0d6efd",
-                    showInput: true,
-                    preferredFormat: "hex",
-                    showPalette: true,
-                    palette: [
-                        ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
-                        ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
-                        ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
-                    ],
-                    change: function (color) {
-                        $('#colorPreview').css('background-color', color.toHexString());
-                    }
-                });
+        $('#eventColorPicker').spectrum({
+            color: "#0d6efd",
+            showInput: true,
+            preferredFormat: "hex",
+            showPalette: true,
+            palette: [
+                ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
+                ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
+                ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
+            ],
+            change: function (color) {
+                $('#colorPreview').css('background-color', color.toHexString());
+            }
+        });
 
-                $('#colorPreview').css('background-color', '#0d6efd');
+        $('#colorPreview').css('background-color', '#0d6efd');
 
-                $('.color-preset').click(function () {
-                    const color = $(this).data('color');
-                    $('#eventColorPicker').spectrum('set', color);
-                    $('#colorPreview').css('background-color', color);
-                });
+        $('.color-preset').click(function () {
+            const color = $(this).data('color');
+            $('#eventColorPicker').spectrum('set', color);
+            $('#colorPreview').css('background-color', color);
+        });
 
-                const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
-                modal.show();
+        const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
+        modal.show();
 
-                $('#saveEventBtn').click(function (event) {
-                    event.preventDefault(); // Prevent default form submission
+        $('#saveEventBtn').click(function (event) {
+            event.preventDefault(); // Prevent default form submission
 
-                    const title = $('#eventTitle').val();
-                    const date = $('#eventDate').val();
-                    const eventDateEnd = $('#eventDateEnd').val();
-                    const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
+            const title = $('#eventTitle').val();
+            const date = $('#eventDate').val();
+            const eventDateEnd = $('#eventDateEnd').val();
+            const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
 
-                    if (title && date && eventDateEnd) {
-                        showPasswordModal(function (isAuthenticated) {
-                            if (isAuthenticated) {
-                                $.ajax({
-                                    url: '/insert-activity',
-                                    method: 'POST',
-                                    contentType: 'application/json',
-                                    data: JSON.stringify({
+            if (title && date && eventDateEnd) {
+                showPasswordModal(function (isAuthenticated) {
+                    if (isAuthenticated) {
+                        $.ajax({
+                            url: '/insert-activity',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                title: title,
+                                activity_date: date,
+                                activity_end: eventDateEnd,
+                                color_hex: colorHex
+                            }),
+                            success: function (response) {
+                                if (response.success) {
+                                    NotificationManager.showNotification('success', 'Activity added successfully!');
+                                    tasks.push({
+                                        id: tasks.length + 1,
+                                        date: date,
+                                        eventDateEnd: eventDateEnd,
                                         title: title,
-                                        activity_date: date,
-                                        activity_end: eventDateEnd,
-                                        color_hex: colorHex
-                                    }),
-                                    success: function (response) {
-                                        if (response.success) {
-                                            NotificationManager.showNotification('success', 'Activity added successfully!');
-                                            tasks.push({
-                                                id: tasks.length + 1,
-                                                date: date,
-                                                eventDateEnd: eventDateEnd,
-                                                title: title,
-                                                colorHex: colorHex
-                                            });
-                                            renderCalendar();
-                                            if (isMobileView) {
-                                                renderMobileTaskList();
-                                            }
-                                            modal.hide(); // Hide the modal
-                                            $('#eventForm')[0].reset(); // Reset the form
-                                            $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
-                                        } else {
-                                            NotificationManager.showNotification('error', 'Error: ' + response.message);
-                                        }
-                                    },
-                                    error: function (jqXHR) {
-                                        NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
+                                        colorHex: colorHex
+                                    });
+                                    renderCalendar();
+                                    if (isMobileView) {
+                                        renderMobileTaskList();
                                     }
-                                });
+                                    modal.hide(); // Hide the modal
+                                    $('#eventForm')[0].reset(); // Reset the form
+                                    $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
+                                } else {
+                                    NotificationManager.showNotification('error', 'Error: ' + response.message);
+                                }
+                            },
+                            error: function (jqXHR) {
+                                NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
                             }
                         });
-                    } else {
-                        NotificationManager.showNotification('warning', 'Please fill in all required fields');
                     }
                 });
-            });
+            } else {
+                NotificationManager.showNotification('warning', 'Please fill in all required fields');
+            }
         });
+    });
+    });
     </script>
 </body>
 
