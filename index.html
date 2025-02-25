@@ -355,7 +355,7 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <script>
-             $(document).ready(function () {
+           $(document).ready(function () {
             const defaultColors = {
                 'blue': '#0d6efd',
                 'green': '#198754',
@@ -474,6 +474,8 @@
 
                     if (isMobileView) {
                         renderMobileTaskList();
+                    } else {
+                        displayNoRecentActivityMessage();
                     }
                 });
 
@@ -533,6 +535,16 @@
                 $('.task-item').on('click', function () {
                     alert('Task: ' + $(this).find('.task-title').text());
                 });
+            }
+
+            function displayNoRecentActivityMessage() {
+                const selectedTasks = tasks.filter(task =>
+                    moment(task.date).isSame(selectedDate, 'day')
+                );
+
+                if (selectedTasks.length === 0) {
+                    alert('No Recent Activity');
+                }
             }
 
             function fetchActivities() {
