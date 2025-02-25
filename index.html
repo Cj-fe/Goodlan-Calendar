@@ -72,7 +72,6 @@
         }
 
         .calendar-navigation .btn {
-            /* Make all buttons the same height */
             height: 38px;
             display: flex;
             align-items: center;
@@ -80,7 +79,6 @@
             min-width: 38px;
         }
 
-        /* Month-year display styling */
         .month-year-display {
             font-size: 1.25rem;
             font-weight: 500;
@@ -161,7 +159,6 @@
             background-color: #dc3545;
         }
 
-        /* Task colors */
         .task-blue {
             border-left-color: #0d6efd;
         }
@@ -178,12 +175,10 @@
             border-left-color: #dc3545;
         }
 
-        /* Mobile Task List (only visible on small screens) */
         .mobile-task-list {
             display: none;
         }
 
-        /* Add event button styling */
         .add-event-btn {
             background-color: #28a745;
             color: white;
@@ -194,8 +189,7 @@
             background-color: #218838;
             color: white;
         }
-        
-        /* Color preview box */
+
         .color-preview {
             width: 30px;
             height: 30px;
@@ -206,7 +200,6 @@
             margin-left: 10px;
         }
 
-        /* Responsive styles */
         @media (max-width: 768px) {
             .calendar-navigation {
                 justify-content: center;
@@ -233,7 +226,6 @@
             }
         }
 
-        /* Mobile view specific styles */
         @media (max-width: 480px) {
             .day-name-full {
                 display: none;
@@ -267,12 +259,10 @@
                 transform: translate(-50%, -50%);
             }
 
-            /* Hide events in mobile view */
             .calendar-body.mobile-hide-events .event {
                 display: none;
             }
 
-            /* Show task list below calendar in mobile view */
             .mobile-task-list {
                 display: block;
                 margin-top: 30px;
@@ -346,7 +336,6 @@
                 </div>
             </div>
 
-            <!-- Mobile Task List - shown only on small screens -->
             <div id="mobile-task-list" class="mobile-task-list">
                 <h3>Tasks for February 2025</h3>
                 <div id="mobile-tasks-container">
@@ -360,48 +349,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <script>
         $(document).ready(function () {
-            // Default colors for the color picker
             const defaultColors = {
                 'blue': '#0d6efd',
                 'green': '#198754',
                 'yellow': '#ffc107',
                 'red': '#dc3545'
             };
-            
-            // Tasks data - similar to your events but with more details
-            const tasks = [
-                { id: 1, date: '2025-02-25', title: 'Review Project Proposal', color: 'blue', colorHex: '#0d6efd' },
-                { id: 2, date: '2025-02-25', title: 'Update Documentation', color: 'green', colorHex: '#198754' },
-                { id: 3, date: '2025-02-26', title: 'Team Meeting Preparation', color: 'yellow', colorHex: '#ffc107' },
-                { id: 4, date: '2025-02-14', title: 'Valentine\'s Day Celebration', color: 'red', colorHex: '#dc3545' },
-                { id: 5, date: '2025-02-17', title: 'Client Presentation', color: 'blue', colorHex: '#0d6efd' },
-                { id: 6, date: '2025-02-03', title: 'Weekly Planning Session', color: 'green', colorHex: '#198754' },
-                { id: 7, date: '2025-02-28', title: 'End of Month Report', color: 'blue', colorHex: '#0d6efd' }
-            ];
 
-            // Current displayed date
+            const tasks = [];
+
             let currentDate = moment();
             let isMobileView = false;
             let selectedDate = null;
 
-            // Function to determine text color based on background
             function getTextColor(hexColor) {
-                // Convert hex to RGB
                 const r = parseInt(hexColor.slice(1, 3), 16);
                 const g = parseInt(hexColor.slice(3, 5), 16);
                 const b = parseInt(hexColor.slice(5, 7), 16);
-                
-                // Calculate luminance - a measure of brightness
                 const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-                
-                // Use white text for dark backgrounds, black for light backgrounds
                 return luminance > 0.5 ? '#000000' : '#ffffff';
             }
 
-            // Function to handle responsive design
             function handleResponsive() {
                 isMobileView = window.innerWidth <= 480;
 
@@ -416,31 +388,24 @@
                     $('.calendar-body').removeClass('mobile-hide-events');
                 }
 
-                // Re-render the calendar to adjust to the new view
                 renderCalendar();
             }
 
-            // Call on load and resize
             $(window).resize(handleResponsive);
 
-            // Function to render calendar
             function renderCalendar() {
                 const firstDay = moment(currentDate).startOf('month').startOf('week');
                 const lastDay = moment(currentDate).endOf('month').endOf('week');
 
-                // Update headers
                 $('#month-year').text(currentDate.format('MMMM YYYY'));
                 $('#nav-month-year').text(currentDate.format('MMMM YYYY'));
 
-                // Clear table
                 $('#calendar-body').empty();
 
-                // Generate calendar rows
                 let date = moment(firstDay);
                 while (date.isBefore(lastDay)) {
                     let row = $('<tr></tr>');
 
-                    // Create 7 days for the week
                     for (let i = 0; i < 7; i++) {
                         const cellDate = moment(date);
                         const isToday = cellDate.isSame(moment(), 'day');
@@ -456,7 +421,6 @@
                         let dateNumber = $('<div class="date-number"></div>').text(cellDate.date());
                         dateCell.append(dateNumber);
 
-                        // Add events for this date (will be hidden in mobile view via CSS)
                         if (!isMobileView) {
                             tasks.forEach(task => {
                                 if (cellDate.format('YYYY-MM-DD') === task.date) {
@@ -482,43 +446,35 @@
                     $('#calendar-body').append(row);
                 }
 
-                // Add click event to cells
                 $('.calendar-table td').click(function () {
                     $('.calendar-table td').removeClass('selected');
                     $(this).addClass('selected');
-                    
-                    // Get the day number from the clicked cell
+
                     const dayNumber = parseInt($(this).find('.date-number').text());
-                    
-                    // Create a new date based on the current month and clicked day
+
                     selectedDate = moment(currentDate).date(dayNumber);
-                    
-                    // If it's another month, adjust accordingly
+
                     if ($(this).hasClass('other-month')) {
-                        if (dayNumber > 20) { // Likely previous month
+                        if (dayNumber > 20) {
                             selectedDate = moment(currentDate).subtract(1, 'month').date(dayNumber);
-                        } else { // Likely next month
+                        } else {
                             selectedDate = moment(currentDate).add(1, 'month').date(dayNumber);
                         }
                     }
                 });
 
-                // Add tooltip to events
                 $('.event').on('click', function (e) {
                     e.stopPropagation();
                     alert('Task: ' + $(this).text());
                 });
             }
 
-            // Function to render mobile task list
             function renderMobileTaskList() {
                 const tasksContainer = $('#mobile-tasks-container');
                 tasksContainer.empty();
 
-                // Update header for mobile task list
                 $('#mobile-task-list h3').text('Tasks for ' + currentDate.format('MMMM YYYY'));
 
-                // Filter tasks for the current month
                 const monthTasks = tasks.filter(task =>
                     moment(task.date).isSame(currentDate, 'month')
                 );
@@ -528,10 +484,8 @@
                     return;
                 }
 
-                // Sort tasks by date
                 monthTasks.sort((a, b) => moment(a.date).diff(moment(b.date)));
 
-                // Group tasks by date
                 const groupedTasks = {};
                 monthTasks.forEach(task => {
                     const dateKey = task.date;
@@ -541,14 +495,13 @@
                     groupedTasks[dateKey].push(task);
                 });
 
-                // Create task items
                 Object.keys(groupedTasks).forEach(dateKey => {
                     const formattedDate = moment(dateKey).format('ddd, MMM D');
 
                     groupedTasks[dateKey].forEach(task => {
                         const taskItem = $('<div class="task-item"></div>')
                             .css('border-left-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
-                            
+
                         const taskContent = $(`
                           <div>
                             <h5 class="task-title">${task.title}</h5>
@@ -561,16 +514,49 @@
                     });
                 });
 
-                // Add click event to the mobile task items
                 $('.task-item').on('click', function () {
                     alert('Task: ' + $(this).find('.task-title').text());
                 });
             }
 
-            // Initial render - call handleResponsive first to set up the view
-            handleResponsive();
+            function fetchActivities() {
+                $.ajax({
+                    url: '/fetch-activities',
+                    method: 'GET',
+                    success: function (response) {
+                        if (response.success) {
+                            const activities = response.activities;
+                            updateCalendarWithActivities(activities);
+                        } else {
+                            alert('Failed to fetch activities: ' + response.message);
+                        }
+                    },
+                    error: function (jqXHR) {
+                        alert('Error fetching activities: ' + jqXHR.responseText);
+                    }
+                });
+            }
 
-            // Navigation buttons
+            function updateCalendarWithActivities(activities) {
+                activities.forEach(activity => {
+                    const activityDate = moment(activity.activity).format('YYYY-MM-DD');
+                    const task = {
+                        id: activity.id,
+                        date: activityDate,
+                        title: activity.title,
+                        colorHex: activity.color_hex
+                    };
+                    tasks.push(task);
+                });
+                renderCalendar();
+                if (isMobileView) {
+                    renderMobileTaskList();
+                }
+            }
+
+            handleResponsive();
+            fetchActivities();
+
             $('#prev-month').click(function () {
                 currentDate.subtract(1, 'month');
                 renderCalendar();
@@ -596,8 +582,7 @@
                 }
             });
 
-            // Add Event button functionality with color picker
-            $('#add-event-btn').click(function() {
+            $('#add-event-btn').click(function () {
                 const dateString = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
                 const modalHtml = `
                   <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
@@ -641,14 +626,10 @@
                     </div>
                   </div>
                 `;
-                
-                // Remove existing modal if any
+
                 $('#addEventModal').remove();
-                
-                // Add modal to body
                 $('body').append(modalHtml);
-                
-                // Initialize the color picker
+
                 $('#eventColorPicker').spectrum({
                     color: "#0d6efd",
                     showInput: true,
@@ -659,33 +640,28 @@
                         ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
                         ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
                     ],
-                    change: function(color) {
+                    change: function (color) {
                         $('#colorPreview').css('background-color', color.toHexString());
                     }
                 });
-                
-                // Update color preview initially
+
                 $('#colorPreview').css('background-color', '#0d6efd');
-                
-                // Color preset buttons
-                $('.color-preset').click(function() {
+
+                $('.color-preset').click(function () {
                     const color = $(this).data('color');
                     $('#eventColorPicker').spectrum('set', color);
                     $('#colorPreview').css('background-color', color);
                 });
-                
-                // Show modal
+
                 const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
                 modal.show();
-                
-                // Save event handler
-                $('#saveEventBtn').click(function() {
+
+                $('#saveEventBtn').click(function () {
                     const title = $('#eventTitle').val();
                     const date = $('#eventDate').val();
                     const colorHex = $('#eventColorPicker').spectrum('get').toHexString();
-                    
+
                     if (title && date) {
-                        // Send POST request to the server
                         $.ajax({
                             url: '/insert-activity',
                             method: 'POST',
@@ -695,7 +671,7 @@
                                 activity_date: date,
                                 color_hex: colorHex
                             }),
-                            success: function(response) {
+                            success: function (response) {
                                 if (response.success) {
                                     alert('Event added successfully!');
                                     tasks.push({
@@ -713,7 +689,7 @@
                                     alert('Error: ' + response.message);
                                 }
                             },
-                            error: function(jqXHR) {
+                            error: function (jqXHR) {
                                 alert('Error: ' + jqXHR.responseText);
                             }
                         });
@@ -723,7 +699,6 @@
                 });
             });
 
-            // View change (placeholder functionality)
             $('.dropdown-item').click(function () {
                 const view = $(this).data('view');
                 alert('Changing to ' + view + ' view. This functionality is not implemented in this demo.');

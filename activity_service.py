@@ -52,3 +52,39 @@ class ActivityService:
         finally:
             cursor.close()
             self.db.disconnect()
+
+    def fetch_activities(self):
+        """
+        Fetch all activities from the activity table.
+
+        Returns:
+        list: A list of dictionaries containing activity details.
+        """
+        if not self.db.connect():
+            return {
+                "success": False,
+                "message": "Database connection failed"
+            }
+
+        try:
+            cursor = self.db.connection.cursor(dictionary=True)
+
+            # Fetch all activities
+            fetch_query = "SELECT id, title, activity, color_hex, created_at FROM activity"
+            cursor.execute(fetch_query)
+            activities = cursor.fetchall()
+
+            return {
+                "success": True,
+                "activities": activities
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error fetching activities: {str(e)}"
+            }
+
+        finally:
+            cursor.close()
+            self.db.disconnect()
