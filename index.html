@@ -866,6 +866,7 @@
                 // Ensure the backdrop is removed when the modal is hidden
                 $('#editEventModal').on('hidden.bs.modal', function () {
                     $('.modal-backdrop').remove();
+                    $(this).remove(); // Remove the modal from the DOM
                 });
 
                 $('#saveEditEventBtn').click(function (event) {
@@ -913,6 +914,7 @@
                     }
                 });
             }
+
 
             function showPasswordModal(callback) {
                 const passwordModalHtml = `
