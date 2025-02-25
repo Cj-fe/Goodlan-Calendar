@@ -447,17 +447,67 @@
         </div>
     </div>
 
+
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
     <script src="plugins/bootstrap-notify/bootstrap-notify.min.js"></script>
-    <script src="notify-manager.js"></script>
     <script src="plugins/node-waves/waves.js"></script>
     <script>
-       $(document).ready(function () {
-            
+        $(document).ready(function () {
+            const NotificationManager = {
+                mobileNotificationCount: 0,
+                maxMobileNotifications: 2,
+                isMobile: () => window.innerWidth <= 768,
+
+                showNotification: function (type, message) {
+                    if (this.isMobile() && this.mobileNotificationCount >= this.maxMobileNotifications) {
+                        const notifications = document.querySelectorAll('.bootstrap-notify-container');
+                        if (notifications.length > 0) {
+                            notifications[0].remove();
+                            this.mobileNotificationCount--;
+                        }
+                    }
+
+                    if (this.isMobile()) {
+                        this.mobileNotificationCount++;
+                    }
+
+                    $.notify({
+                        message: message,
+                        icon: type === 'success' ? 'bi bi-check-circle' : 'bi bi-exclamation-circle'
+                    }, {
+                        type: type,
+                        allow_dismiss: true,
+                        newest_on_top: true,
+                        timer: 3000,
+                        placement: {
+                            from: 'top',
+                            align: this.isMobile() ? 'center' : 'right'
+                        },
+                        animate: {
+                            enter: 'animated bounceInDown',
+                            exit: 'animated bounceOutUp'
+                        },
+                        template:
+                            '<div data-notify="container" class="bootstrap-notify-container alert alert-{0}" role="alert">' +
+                            '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+                            '<div class="notification-content">' +
+                            '<span data-notify="icon"></span>' +
+                            '<span data-notify="message">{2}</span>' +
+                            '</div>' +
+                            '</div>',
+                        onClose: () => {
+                            if (this.isMobile()) {
+                                this.mobileNotificationCount--;
+                            }
+                        }
+                    });
+                }
+            };
 
             const defaultColors = {
                 'blue': '#0d6efd',
@@ -745,79 +795,14 @@
             }
 
             function populateEditModal(activity) {
-                // Remove any existing modal to prevent duplicates
-                $('#editEventModal').remove();
+                $('#editEventModal #editEventTitle').val(activity.title);
+                $('#editEventModal #editEventDate').val(activity.activity);
+                $('#editEventModal #editEventDateEnd').val(activity.activity_end);
+                $('#editEventModal #editEventColorPicker').spectrum('set', activity.color_hex);
+                $('#editEventModal #editColorPreview').css('background-color', activity.color_hex);
 
-                // Create the modal HTML
-                const modalHtml = `
-            <div class="modal fade" id="editEventModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Edit Activity</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="editEventForm">
-                                <div class="mb-3">
-                                    <label for="editEventTitle" class="form-label">Activity Title</label>
-                                    <input type="text" class="form-control" id="editEventTitle" value="${activity.title}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editEventDate" class="form-label">Date Start</label>
-                                    <input type="date" class="form-control" id="editEventDate" value="${new Date(activity.activity).toISOString().split('T')[0]}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editEventDateEnd" class="form-label">Date End</label>
-                                    <input type="date" class="form-control" id="editEventDateEnd" value="${new Date(activity.activity_end).toISOString().split('T')[0]}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editEventColor" class="form-label">Color</label>
-                                    <div class="d-flex align-items-center">
-                                        <input type="text" id="editEventColorPicker" class="form-control">
-                                        <div id="editColorPreview" class="color-preview ms-2"></div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" id="saveEditEventBtn">Save Changes</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-                // Append the modal HTML to the body
-                $('body').append(modalHtml);
-
-                // Initialize the color picker
-                $('#editEventColorPicker').spectrum({
-                    color: activity.color_hex,
-                    showInput: true,
-                    preferredFormat: "hex",
-                    showPalette: true,
-                    palette: [
-                        ["#0d6efd", "#198754", "#ffc107", "#dc3545"],
-                        ["#6610f2", "#20c997", "#fd7e14", "#d63384"],
-                        ["#6f42c1", "#0dcaf0", "#adb5bd", "#212529"]
-                    ],
-                    change: function (color) {
-                        $('#editColorPreview').css('background-color', color.toHexString());
-                    }
-                });
-
-                $('#editColorPreview').css('background-color', activity.color_hex);
-
-                // Show the modal
                 const modal = new bootstrap.Modal(document.getElementById('editEventModal'));
                 modal.show();
-
-                // Ensure the backdrop is removed when the modal is hidden
-                $('#editEventModal').on('hidden.bs.modal', function () {
-                    $('.modal-backdrop').remove();
-                });
             }
 
             handleResponsive();
@@ -980,7 +965,6 @@
                 });
             });
         });
-    
     </script>
 </body>
 
