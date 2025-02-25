@@ -354,7 +354,7 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
     <script>
-         $(document).ready(function () {
+          $(document).ready(function () {
             const defaultColors = {
                 'blue': '#0d6efd',
                 'green': '#198754',
@@ -470,6 +470,10 @@
                             selectedDate = moment(currentDate).add(1, 'month').date(dayNumber);
                         }
                     }
+
+                    if (isMobileView) {
+                        renderMobileTaskList();
+                    }
                 });
 
                 $('.event').on('click', function (e) {
@@ -507,20 +511,22 @@
                 Object.keys(groupedTasks).forEach(dateKey => {
                     const formattedDate = moment(dateKey).format('ddd, MMM D');
 
-                    groupedTasks[dateKey].forEach(task => {
-                        const taskItem = $('<div class="task-item"></div>')
-                            .css('border-left-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
+                    if (selectedDate && moment(dateKey).isSame(selectedDate, 'day')) {
+                        groupedTasks[dateKey].forEach(task => {
+                            const taskItem = $('<div class="task-item"></div>')
+                                .css('border-left-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
 
-                        const taskContent = $(`
-                          <div>
-                            <h5 class="task-title">${task.title}</h5>
-                            <div class="task-date">${formattedDate}</div>
-                          </div>
-                        `);
+                            const taskContent = $(`
+                              <div>
+                                <h5 class="task-title">${task.title}</h5>
+                                <div class="task-date">${formattedDate}</div>
+                              </div>
+                            `);
 
-                        taskItem.append(taskContent);
-                        tasksContainer.append(taskItem);
-                    });
+                            taskItem.append(taskContent);
+                            tasksContainer.append(taskItem);
+                        });
+                    }
                 });
 
                 $('.task-item').on('click', function () {
