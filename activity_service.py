@@ -55,7 +55,6 @@ class ActivityService:
             cursor.close()
             self.db.disconnect()
 
-
     def fetch_activities(self):
         """
         Fetch all activities from the activity table.
@@ -91,7 +90,6 @@ class ActivityService:
         finally:
             cursor.close()
             self.db.disconnect()
-
 
     def check_code(self, code):
         """
@@ -140,49 +138,65 @@ class ActivityService:
         finally:
             cursor.close()
             self.db.disconnect()
-    def fetch_activity_by_id(self, activity_id):
-            """
-            Fetch a specific activity by its ID.
-    
-            Parameters:
-            activity_id (str): The ID of the activity to fetch.
-    
-            Returns:
-            dict: Contains success status and the activity details or an error message.
-            """
-            if not self.db.connect():
-                return {
-                    "success": False,
-                    "message": "Database connection failed"
-                }
-    
-            try:
-                cursor = self.db.connection.cursor(dictionary=True)
-    
-                # Fetch the activity by ID
-                fetch_query = "SELECT id, title, activity, activity_end, color_hex FROM activity WHERE id = %s"
-                cursor.execute(fetch_query, (activity_id,))
-                activity = cursor.fetchone()
-    
-                if activity:
-                    return {
-                        "success": True,
-                        "activity": activity
-                    }
-                else:
-                    return {
-                        "success": False,
-                        "message": "Activity not found"
-                    }
-    
-            except Exception as e:
-                return {
-                    "success": False,
-                    "message": f"Error fetching activity: {str(e)}"
-                }
-    
-            finally:
-                cursor.close()
-                self.db.disconnect()
-    
-    
+
+    def update_activity(self, activity_id, title=None, activity_date=None, activity_end=None, color_hex=None):
+        """
+        Update an existing activity record in the activity table.
+
+        Parameters:
+        activity_id (str): The unique ID of the activity to update.
+        title (str, optional): The new title of the activity.
+        activity_date (str, optional): The new start date of the activity in 'YYYY-MM-DD' format.
+        activity_end (str, optional): The new end date of the activity in 'YYYY-MM-DD' format.
+        color_hex (str, optional): The new color code in hex format.
+
+        Returns:
+        dict: Contains success status and any error message.
+        """
+        if not self.db.connect():
+            return {
+                "success": False,
+                "message": "Database connection failed"
+            }
+
+        try:
+            cursor = self.db.connection.cursor(dictionary=True)
+
+            # Update the activity record
+            update_query = "UPDATE activity SET "
+            update_fields = []
+            update_values = []
+
+            if title is not None:
+                update_fields.append("title = %s")
+                update_values.append(title)
+            if activity_date is not None:
+                update_fields.append("activity = %s")
+                update_values.append(activity_date)
+            if activity_end is not None:
+                update_fields.append("activity_end = %s")
+                update_values.append(activity_end)
+            if color_hex is not None:
+                update_fields.append("color_hex = %s")
+                update_values.append(color_hex)
+
+            update_values.append(activity_id)
+            update_query += ", ".join(update_fields) + " WHERE id = %s"
+
+            cursor.execute(update_query, update_values)
+            self.db.connection.commit()
+
+            return {
+                "success": True,
+                "message": "Activity updated successfully"
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error updating activity: {str(e)}"
+            }
+
+        finally:
+            cursor.close()
+            self.db.disconnect()

@@ -734,19 +734,42 @@
                 if (title && date && eventDateEnd) {
                     const taskIndex = tasks.findIndex(t => t.id === currentTaskId);
                     if (taskIndex !== -1) {
-                        tasks[taskIndex] = {
-                            ...tasks[taskIndex],
-                            title,
-                            date,
-                            eventDateEnd,
-                            colorHex
-                        };
-                        renderCalendar();
-                        if (isMobileView) {
-                            renderMobileTaskList();
-                        }
-                        $('#editEventModal').modal('hide');
-                        NotificationManager.showNotification('success', 'Activity updated successfully!');
+                        const taskId = tasks[taskIndex].id;
+
+                        $.ajax({
+                            url: '/update-activity',
+                            method: 'PUT',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                id: taskId,
+                                title: title,
+                                activity_date: date,
+                                activity_end: eventDateEnd,
+                                color_hex: colorHex
+                            }),
+                            success: function (response) {
+                                if (response.success) {
+                                    tasks[taskIndex] = {
+                                        ...tasks[taskIndex],
+                                        title,
+                                        date,
+                                        eventDateEnd,
+                                        colorHex
+                                    };
+                                    renderCalendar();
+                                    if (isMobileView) {
+                                        renderMobileTaskList();
+                                    }
+                                    $('#editEventModal').modal('hide');
+                                    NotificationManager.showNotification('success', 'Activity updated successfully!');
+                                } else {
+                                    NotificationManager.showNotification('error', 'Error: ' + response.message);
+                                }
+                            },
+                            error: function (jqXHR) {
+                                NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
+                            }
+                        });
                     }
                 } else {
                     NotificationManager.showNotification('warning', 'Please fill in all required fields');
