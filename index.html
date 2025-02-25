@@ -899,7 +899,9 @@
                                             if (isMobileView) {
                                                 renderMobileTaskList();
                                             }
-                                            modal.hide();
+                                            $('#addEventModal').modal('hide'); // Hide the modal
+                                            $('#eventForm')[0].reset(); // Reset the form
+                                            $('#colorPreview').css('background-color', '#0d6efd'); // Reset color preview
                                         } else {
                                             NotificationManager.showNotification('error', 'Error: ' + response.message);
                                         }
