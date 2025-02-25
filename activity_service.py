@@ -1,160 +1,188 @@
-from flask import Flask, send_from_directory, request, jsonify
-from activity_service import ActivityService
-import os
+from includes.config import DatabaseConfig
+import uuid
+import bcrypt
+from datetime import datetime
 
-# Create Flask app
-app = Flask(__name__)
+class ActivityService:
+    def __init__(self):
+        """Initialize the ActivityService with database configuration."""
+        self.db = DatabaseConfig()
 
-# Get the directory of the current file
-project_root = os.path.dirname(os.path.abspath(__file__))
+    def insert_activity(self, title, activity_date, activity_end, color_hex):
+        """
+        Insert a new activity record into the activity table.
 
-# Configure the static folder
-app = Flask(__name__, static_folder='static')
+        Parameters:
+        title (str): The title of the activity.
+        activity_date (str): The start date of the activity in 'YYYY-MM-DD' format.
+        activity_end (str): The end date of the activity in 'YYYY-MM-DD' format.
+        color_hex (str): The color code in hex format.
 
-# Route to serve index.html
-@app.route('/')
-def serve_index():
-    return send_from_directory(project_root, 'index.html')
-
-# Route to serve images
-@app.route('/image/<path:filename>')
-def serve_images(filename):
-    images_dir = os.path.join(project_root, 'image')
-    return send_from_directory(images_dir, filename)
-
-# Route to serve CSS files
-@app.route('/css/<path:filename>')
-def serve_css(filename):
-    css_dir = os.path.join(project_root, 'css')
-    return send_from_directory(css_dir, filename)
-
-@app.route('/plugins/<path:filename>')
-def serve_plugins(filename):
-    plugins_dir = os.path.join(project_root, 'plugins')
-    return send_from_directory(plugins_dir, filename)
-
-@app.route('/insert-activity', methods=['POST'])
-def insert_activity():
-    try:
-        data = request.json
-        title = data.get('title')
-        activity_date = data.get('activity_date')
-        activity_end = data.get('activity_end')  # Added activity_end
-        color_hex = data.get('color_hex')
-
-        if not title or not activity_date or not activity_end or not color_hex:
-            return jsonify({
+        Returns:
+        dict: Contains success status and any error message.
+        """
+        if not self.db.connect():
+            return {
                 "success": False,
-                "message": "Title, activity date, activity end date, and color hex are required"
-            }), 400
+                "message": "Database connection failed"
+            }
 
-        activity_service = ActivityService()
-        result = activity_service.insert_activity(title, activity_date, activity_end, color_hex)
+        try:
+            cursor = self.db.connection.cursor(dictionary=True)
 
-        if result["success"]:
-            return jsonify({
+            # Insert the activity record
+            insert_query = """
+            INSERT INTO activity (id, title, activity, activity_end, color_hex, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            activity_id = str(uuid.uuid4())
+            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            cursor.execute(insert_query, (activity_id, title, activity_date, activity_end, color_hex, created_at))
+            self.db.connection.commit()
+
+            return {
                 "success": True,
-                "message": result["message"]
-            })
-        else:
-            return jsonify({
+                "message": "Activity inserted successfully"
+            }
+
+        except Exception as e:
+            return {
                 "success": False,
-                "message": result["message"]
-            }), 500
+                "message": f"Error inserting activity: {str(e)}"
+            }
 
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        finally:
+            cursor.close()
+            self.db.disconnect()
 
-@app.route('/fetch-activities', methods=['GET'])
-def fetch_activities():
-    try:
-        activity_service = ActivityService()
-        result = activity_service.fetch_activities()
 
-        if result["success"]:
-            return jsonify({
+    def fetch_activities(self):
+        """
+        Fetch all activities from the activity table.
+
+        Returns:
+        list: A list of dictionaries containing activity details.
+        """
+        if not self.db.connect():
+            return {
+                "success": False,
+                "message": "Database connection failed"
+            }
+
+        try:
+            cursor = self.db.connection.cursor(dictionary=True)
+
+            # Fetch all activities
+            fetch_query = "SELECT id, title, activity, color_hex, created_at FROM activity"
+            cursor.execute(fetch_query)
+            activities = cursor.fetchall()
+
+            return {
                 "success": True,
-                "activities": result["activities"]
-            })
-        else:
-            return jsonify({
+                "activities": activities
+            }
+
+        except Exception as e:
+            return {
                 "success": False,
-                "message": result["message"]
-            }), 500
+                "message": f"Error fetching activities: {str(e)}"
+            }
 
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        finally:
+            cursor.close()
+            self.db.disconnect()
 
-@app.route('/fetch_activity_by_id/<activity_id>', methods=['GET'])
-def fetch_activity_by_id(activity_id):
-    """
-    Fetch a specific activity by its ID.
 
-    Parameters:
-    activity_id (str): The ID of the activity to fetch.
+    def check_code(self, code):
+        """
+        Check if the provided code matches any hashed code in the web_development_team_code table.
 
-    Returns:
-    JSON: Contains success status and the activity details or an error message.
-    """
-    try:
-        activity_service = ActivityService()
-        result = activity_service.fetch_activity_by_id(activity_id)
+        Parameters:
+        code (str): The code to check.
 
-        if result["success"]:
-            return jsonify({
-                "success": True,
-                "activity": result["activity"]
-            })
-        else:
-            return jsonify({
+        Returns:
+        dict: Contains success status and any error message.
+        """
+        if not self.db.connect():
+            return {
                 "success": False,
-                "message": result["message"]
-            }), 404
+                "message": "Database connection failed"
+            }
 
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+        try:
+            cursor = self.db.connection.cursor(dictionary=True)
 
-@app.route('/check-code', methods=['POST'])
-def check_code():
-    try:
-        data = request.json
-        code = data.get('code')
+            # Fetch all hashed codes from the table
+            check_query = "SELECT code FROM web_development_team_code"
+            cursor.execute(check_query)
+            results = cursor.fetchall()
 
-        if not code:
-            return jsonify({
+            # Verify the provided code against each hashed code
+            for result in results:
+                hashed_code = result['code'].encode('utf-8')
+                if bcrypt.checkpw(code.encode('utf-8'), hashed_code):
+                    return {
+                        "success": True,
+                        "message": "Code is valid"
+                    }
+
+            return {
                 "success": False,
-                "message": "Code is required"
-            }), 400
+                "message": "Invalid code"
+            }
 
-        activity_service = ActivityService()
-        result = activity_service.check_code(code)
-
-        if result["success"]:
-            return jsonify({
-                "success": True,
-                "message": result["message"]
-            })
-        else:
-            return jsonify({
+        except Exception as e:
+            return {
                 "success": False,
-                "message": result["message"]
-            }), 400
+                "message": f"Error checking code: {str(e)}"
+            }
 
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
-
-# This is for local development
-if __name__ == '__main__':
-    app.run(debug=True)
+        finally:
+            cursor.close()
+            self.db.disconnect()
+    def fetch_activity_by_id(self, activity_id):
+            """
+            Fetch a specific activity by its ID.
+    
+            Parameters:
+            activity_id (str): The ID of the activity to fetch.
+    
+            Returns:
+            dict: Contains success status and the activity details or an error message.
+            """
+            if not self.db.connect():
+                return {
+                    "success": False,
+                    "message": "Database connection failed"
+                }
+    
+            try:
+                cursor = self.db.connection.cursor(dictionary=True)
+    
+                # Fetch the activity by ID
+                fetch_query = "SELECT id, title, activity, activity_end, color_hex FROM activity WHERE id = %s"
+                cursor.execute(fetch_query, (activity_id,))
+                activity = cursor.fetchone()
+    
+                if activity:
+                    return {
+                        "success": True,
+                        "activity": activity
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": "Activity not found"
+                    }
+    
+            except Exception as e:
+                return {
+                    "success": False,
+                    "message": f"Error fetching activity: {str(e)}"
+                }
+    
+            finally:
+                cursor.close()
+                self.db.disconnect()
+    
+    
