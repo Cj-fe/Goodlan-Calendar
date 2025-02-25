@@ -87,6 +87,38 @@ def fetch_activities():
             "message": str(e)
         }), 500
 
+@app.route('/check-code', methods=['POST'])
+def check_code():
+        try:
+            data = request.json
+            code = data.get('code')
+
+            if not code:
+                return jsonify({
+                    "success": False,
+                    "message": "Code is required"
+                }), 400
+
+            activity_service = ActivityService()
+            result = activity_service.check_code(code)
+
+            if result["success"]:
+                return jsonify({
+                    "success": True,
+                    "message": result["message"]
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "message": result["message"]
+                }), 400
+
+        except Exception as e:
+            return jsonify({
+                "success": False,
+                "message": str(e)
+            }), 500
+
 # This is for local development
 if __name__ == '__main__':
     app.run(debug=True)
