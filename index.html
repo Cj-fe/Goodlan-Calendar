@@ -889,7 +889,7 @@
                                     }),
                                     success: function (response) {
                                         if (response.success) {
-                                            NotificationManager.showNotification('success', 'Activity added successfully!');
+                                            NotificationManager.showNotification('success', 'Event added successfully!');
                                             tasks.push({
                                                 id: tasks.length + 1,
                                                 date: date,
@@ -903,11 +903,11 @@
                                             }
                                             modal.hide();
                                         } else {
-                                            NotificationManager.showNotification('error', 'Invalid Code. Please Try Again!');
+                                            NotificationManager.showNotification('error', 'Error: ' + response.message);
                                         }
                                     },
                                     error: function (jqXHR) {
-                                        NotificationManager.showNotification('error', 'Invalid Code. Please Try Again!');
+                                        NotificationManager.showNotification('error', 'Error: ' + jqXHR.responseText);
                                     }
                                 });
                             }
