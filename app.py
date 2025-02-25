@@ -28,6 +28,11 @@ def serve_css(filename):
     css_dir = os.path.join(project_root, 'css')
     return send_from_directory(css_dir, filename)
 
+@app.route('/plugins/<path:filename>')
+def serve_plugins(filename):
+    plugins_dir = os.path.join(project_root, 'plugins')
+    return send_from_directory(plugins_dir, filename)
+
 @app.route('/insert-activity', methods=['POST'])
 def insert_activity():
     try:
