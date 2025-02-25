@@ -68,6 +68,7 @@ def insert_activity():
             "message": str(e)
         }), 500
 
+
 @app.route('/fetch-activities', methods=['GET'])
 def fetch_activities():
     try:
@@ -90,70 +91,40 @@ def fetch_activities():
             "success": False,
             "message": str(e)
         }), 500
+    
 
-@app.route('/fetch_activity_by_id/<activity_id>', methods=['GET'])
-def fetch_activity_by_id(activity_id):
-    """
-    Fetch a specific activity by its ID.
-
-    Parameters:
-    activity_id (str): The ID of the activity to fetch.
-
-    Returns:
-    JSON: Contains success status and the activity details or an error message.
-    """
-    try:
-        activity_service = ActivityService()
-        result = activity_service.fetch_activity_by_id(activity_id)
-
-        if result["success"]:
-            return jsonify({
-                "success": True,
-                "activity": result["activity"]
-            })
-        else:
-            return jsonify({
-                "success": False,
-                "message": result["message"]
-            }), 404
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
 
 @app.route('/check-code', methods=['POST'])
 def check_code():
-    try:
-        data = request.json
-        code = data.get('code')
+        try:
+            data = request.json
+            code = data.get('code')
 
-        if not code:
+            if not code:
+                return jsonify({
+                    "success": False,
+                    "message": "Code is required"
+                }), 400
+
+            activity_service = ActivityService()
+            result = activity_service.check_code(code)
+
+            if result["success"]:
+                return jsonify({
+                    "success": True,
+                    "message": result["message"]
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "message": result["message"]
+                }), 400
+
+        except Exception as e:
             return jsonify({
                 "success": False,
-                "message": "Code is required"
-            }), 400
-
-        activity_service = ActivityService()
-        result = activity_service.check_code(code)
-
-        if result["success"]:
-            return jsonify({
-                "success": True,
-                "message": result["message"]
-            })
-        else:
-            return jsonify({
-                "success": False,
-                "message": result["message"]
-            }), 400
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
+                "message": str(e)
+            }), 500
 
 # This is for local development
 if __name__ == '__main__':
