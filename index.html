@@ -547,13 +547,27 @@
                         let dateNumber = $('<div class="date-number"></div>').text(cellDate.date());
                         dateCell.append(dateNumber);
 
-                        tasks.forEach(task => {
-                            const taskStart = moment(task.date);
-                            const taskEnd = moment(task.eventDateEnd);
-                            if (cellDate.isBetween(taskStart, taskEnd, 'day', '[]')) {
-                                dateCell.css('background-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
-                            }
-                        });
+                        if (!isMobileView) {
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
+                                    let eventDiv = $('<div></div>')
+                                        .addClass('event')
+                                        .css({
+                                            'background-color': task.colorHex || defaultColors[task.color] || '#0d6efd',
+                                            'color': getTextColor(task.colorHex || defaultColors[task.color] || '#0d6efd')
+                                        })
+                                        .text(task.title)
+                                        .attr('data-task-id', task.id);
+                                    dateCell.append(eventDiv);
+                                }
+                            });
+                        } else {
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
+                                    dateCell.css('border-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
+                                }
+                            });
+                        }
 
                         cell.append(dateCell);
                         row.append(cell);
