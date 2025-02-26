@@ -348,6 +348,45 @@
             display: inline;
             vertical-align: middle;
         }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: white;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .task-title {
+            font-weight: 500;
+            margin: 0;
+            font-size: 12px;
+            color: #333;
+            flex-grow: 1;
+        }
+
+        .task-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .task-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        
     </style>
 </head>
 
