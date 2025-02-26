@@ -798,6 +798,10 @@
                     <input type="date" class="form-control" id="editEventDate" value="${task.date}" required>
                   </div>
                   <div class="mb-3">
+                    <label for="editEventEndDate" class="form-label">Date End</label>
+                    <input type="date" class="form-control" id="editEventEndDate" value="${task.eventDateEnd}" required>
+                  </div>
+                  <div class="mb-3">
                     <label for="editEventColor" class="form-label">Color</label>
                     <input type="text" id="editEventColorPicker" class="form-control" value="${task.colorHex}">
                   </div>
@@ -836,9 +840,10 @@
                 $('#saveEditEventBtn').click(function () {
                     const title = $('#editEventTitle').val();
                     const date = $('#editEventDate').val();
+                    const endDate = $('#editEventEndDate').val();
                     const colorHex = $('#editEventColorPicker').spectrum('get').toHexString();
 
-                    if (title && date) {
+                    if (title && date && endDate) {
                         showPasswordModal(function (isAuthenticated) {
                             if (isAuthenticated) {
                                 $.ajax({
@@ -848,13 +853,15 @@
                                     data: JSON.stringify({
                                         id: taskId,
                                         title: title,
-                                        date: date,
-                                        colorHex: colorHex
+                                        activity_date: date,
+                                        activity_end: endDate,
+                                        color_hex: colorHex
                                     }),
                                     success: function (response) {
                                         if (response.success) {
                                             task.title = title;
                                             task.date = date;
+                                            task.eventDateEnd = endDate;
                                             task.colorHex = colorHex;
                                             renderCalendar();
                                             if (isMobileView) {
