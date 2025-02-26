@@ -547,12 +547,9 @@
                         let dateNumber = $('<div class="date-number"></div>').text(cellDate.date());
                         dateCell.append(dateNumber);
 
-                        tasks.forEach(task => {
-                            const taskStartDate = moment(task.date);
-                            const taskEndDate = moment(task.eventDateEnd);
-                            if (cellDate.isBetween(taskStartDate, taskEndDate, null, '[]')) {
-                                dateCell.css('background-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
-                                if (!isMobileView) {
+                        if (!isMobileView) {
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
                                     let eventDiv = $('<div></div>')
                                         .addClass('event')
                                         .css({
@@ -563,8 +560,14 @@
                                         .attr('data-task-id', task.id);
                                     dateCell.append(eventDiv);
                                 }
-                            }
-                        });
+                            });
+                        } else {
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
+                                    dateCell.css('border-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
+                                }
+                            });
+                        }
 
                         cell.append(dateCell);
                         row.append(cell);
@@ -702,8 +705,7 @@
                         id: activity.id,
                         date: activityDate,
                         title: activity.title,
-                        colorHex: activity.color_hex,
-                        eventDateEnd: activity.activity_end
+                        colorHex: activity.color_hex
                     };
                     tasks.push(task);
                 });
@@ -886,6 +888,9 @@
                     }
                 });
             }
+
+
+
 
             function deleteTask(taskId) {
                 const taskIndex = tasks.findIndex(t => t.id === taskId);

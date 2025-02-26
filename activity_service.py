@@ -71,8 +71,8 @@ class ActivityService:
         try:
             cursor = self.db.connection.cursor(dictionary=True)
 
-            # Fetch all activities
-            fetch_query = "SELECT id, title, activity, color_hex, created_at FROM activity"
+            # Fetch all activities including activity_end
+            fetch_query = "SELECT id, title, activity, activity_end, color_hex, created_at FROM activity"
             cursor.execute(fetch_query)
             activities = cursor.fetchall()
 
