@@ -547,47 +547,26 @@
                         let dateNumber = $('<div class="date-number"></div>').text(cellDate.date());
                         dateCell.append(dateNumber);
 
-                        const dateStr = cellDate.format('YYYY-MM-DD');
-
-                        // Find tasks that overlap with this date (between start and end dates)
-                        const overlappingTasks = tasks.filter(task => {
-                            const taskStart = task.date;
-                            const taskEnd = task.endDate || task.date; // If no end date, use start date
-                            return dateStr >= taskStart && dateStr <= taskEnd;
-                        });
-
                         if (!isMobileView) {
-                            // Handle multiple tasks on the same date
-                            overlappingTasks.forEach(task => {
-                                let eventDiv = $('<div></div>')
-                                    .addClass('event')
-                                    .css({
-                                        'background-color': task.colorHex || defaultColors[task.color] || '#0d6efd',
-                                        'color': getTextColor(task.colorHex || defaultColors[task.color] || '#0d6efd')
-                                    })
-                                    .text(task.title)
-                                    .attr('data-task-id', task.id);
-
-                                // Add an indicator if this is the start or end date
-                                if (dateStr === task.date) {
-                                    eventDiv.prepend('◆ '); // Start indicator
-                                } else if (dateStr === task.endDate) {
-                                    eventDiv.append(' ◆'); // End indicator
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
+                                    let eventDiv = $('<div></div>')
+                                        .addClass('event')
+                                        .css({
+                                            'background-color': task.colorHex || defaultColors[task.color] || '#0d6efd',
+                                            'color': getTextColor(task.colorHex || defaultColors[task.color] || '#0d6efd')
+                                        })
+                                        .text(task.title)
+                                        .attr('data-task-id', task.id);
+                                    dateCell.append(eventDiv);
                                 }
-
-                                dateCell.append(eventDiv);
                             });
                         } else {
-                            // For mobile view, handle the date cell coloring
-                            if (overlappingTasks.length > 0) {
-                                // Use the color of the first task (you could implement a priority system here)
-                                const firstTask = overlappingTasks[0];
-                                dateCell.css('border-color', firstTask.colorHex || defaultColors[firstTask.color] || '#0d6efd');
-
-                                // Add a background color with reduced opacity
-                                const bgColor = firstTask.colorHex || defaultColors[firstTask.color] || '#0d6efd';
-                                dateCell.css('background-color', hexToRgba(bgColor, 0.2));
-                            }
+                            tasks.forEach(task => {
+                                if (cellDate.format('YYYY-MM-DD') === task.date) {
+                                    dateCell.css('border-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
+                                }
+                            });
                         }
 
                         cell.append(dateCell);
@@ -598,7 +577,6 @@
 
                     $('#calendar-body').append(row);
                 }
-
 
                 $('.calendar-table td').click(function () {
                     $('.calendar-table td').removeClass('selected');
@@ -722,14 +700,10 @@
 
             function updateCalendarWithActivities(activities) {
                 activities.forEach(activity => {
-                    const startDate = moment(activity.activity).format('YYYY-MM-DD');
-                    const endDate = moment(activity.activity_end).format('YYYY-MM-DD');
-
-                    // Create a task object with start and end dates
+                    const activityDate = moment(activity.activity).format('YYYY-MM-DD');
                     const task = {
                         id: activity.id,
-                        date: startDate,
-                        endDate: endDate,
+                        date: activityDate,
                         title: activity.title,
                         colorHex: activity.color_hex
                     };
@@ -740,7 +714,6 @@
                     renderMobileTaskList();
                 }
             }
-
 
             function showPasswordModal(callback) {
                 const passwordModalHtml = `
