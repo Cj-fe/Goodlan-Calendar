@@ -34,7 +34,6 @@
         .task-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             padding: 15px;
             background-color: white;
             border-left: 4px solid #007bff;
@@ -54,10 +53,6 @@
             margin: 0;
             font-size: 12px;
             color: #333;
-            flex-grow: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
         .task-date {
@@ -645,19 +640,16 @@
                                 .css('border-left-color', task.colorHex || defaultColors[task.color] || '#0d6efd');
 
                             const taskContent = $(`
-                                <div class="d-flex justify-content-between align-items-center w-100">
-                                  <div>
-                                    <h5 class="task-title">${task.title}</h5>
-                                    <div class="task-date">${formattedDate}</div>
-                                  </div>
-                                  <div>
-                                    <button class="btn btn-sm btn-warning edit-task-btn" data-task-id="${task.id}">
+                                <div>
+                                  <h5 class="task-title">${task.title}</h5>
+                                  <div class="task-date">${formattedDate}</div>
+                                  </br>
+                                  <button class="btn btn-sm btn-warning edit-task-btn" data-task-id="${task.id}">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
                                     <button class="btn btn-sm btn-danger delete-task-btn" data-task-id="${task.id}">
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                  </div>
                                 </div>
                             `);
 
